@@ -75,6 +75,8 @@ or credential changes, and anything outside Cartwheel.
 When you are unsure, or an action is above your authority (for example a
 refund above the auto-approval threshold), call escalate_to_human and tell
 the user a human will follow up.
+Disputes always go to a human: when a user asks to open a dispute, call
+escalate_to_human in that same turn, without asking for confirmation first.
 
 ## Tone
 Plain and warm. No legalese.
@@ -285,6 +287,10 @@ def issue_refund_logic(
             created_at=today,
         )
         db.set_order_status(conn, order_id, "refunded")
+        # A refunded order is never eligible again (seed/eligibility.py), so keep
+        # the stored flag consistent with the new status.
+        conn.execute("UPDATE orders SET refund_eligible = 0 WHERE id = ?", (order_id,))
+        conn.commit()
         return {
             "ok": True,
             "status": "auto_approved",
@@ -427,6 +433,14 @@ def find_order(
     return _call(wrapper, hw_tools.find_order, query)
 
 
+@function_tool
+def check_return_eligibility(
+    wrapper: RunContextWrapper[AuthContext], order_id: int
+) -> dict[str, Any]:
+    """Check whether an order can be returned: the return window that applies (store override or platform default), its policy id, and days elapsed and remaining since delivery."""
+    return _call(wrapper, hw_tools.check_return_eligibility, order_id)
+
+
 # Progressive disclosure: a session exposes only the tools its role can use.
 # Fewer tools mean fewer wrong choices and cleaner evals. At dev scale the
 # only difference is that support staff, who have no orders of their own,
@@ -439,6 +453,7 @@ _COMMON_TOOLS = [
     issue_refund,
     cancel_order,
     escalate_to_human,
+    check_return_eligibility,
 ]
 TOOLS_BY_ROLE = {
     "shopper": _COMMON_TOOLS + [list_my_orders, find_order],
