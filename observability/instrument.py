@@ -99,6 +99,8 @@ def setup_tracing() -> bool:
         return False
     from langfuse import get_client
 
+    # Keep local course traces apart from any shared or production project.
+    os.environ.setdefault("LANGFUSE_TRACING_ENVIRONMENT", "development")
     get_client()  # registers the OTel tracer provider from LANGFUSE_* env vars
     instrument_genai(trace.get_tracer_provider())
     # Preserve processor replacement for callers such as the server, which
@@ -108,6 +110,40 @@ def setup_tracing() -> bool:
         return False
     log.info("tracing enabled; spans go to %s", os.environ.get("LANGFUSE_HOST"))
     return True
+
+
+TRACE_NAME = "cartwheel-chat-turn"
+
+
+def trace_context(
+    ctx: "AuthContext", *, session_id: str, prompt_version: str, channel: str
+) -> Any:
+    """Propagate Langfuse trace attributes to every span in one turn.
+
+    Enter this before starting the root span. Langfuse copies the trace name,
+    user_id, session_id, version, and tags onto the root span and every child
+    span, so traces group by conversation in the Sessions view and filter by
+    caller, prompt version, and entry point. The trace name is one stable
+    value for every turn (the root span keeps its HW2 name); tags carry the
+    channel and role. Tags are fixed at creation, so only stable dimensions
+    belong here; the HW2 `cartwheel.*` span attributes stay as they are.
+    """
+    from langfuse import propagate_attributes
+
+    return propagate_attributes(
+        trace_name=TRACE_NAME,
+        user_id=str(ctx.user_id),
+        session_id=session_id,
+        version=prompt_version,
+        tags=[channel, f"role:{ctx.role}"],
+    )
+
+
+def flush_tracing() -> None:
+    """Send buffered spans before the process exits; no-op when tracing is off."""
+    force_flush = getattr(trace.get_tracer_provider(), "force_flush", None)
+    if force_flush is not None:
+        force_flush()
 
 
 def record_tool_result(ctx: "AuthContext", result: dict[str, Any]) -> None:
@@ -123,10 +159,11 @@ def record_tool_result(ctx: "AuthContext", result: dict[str, Any]) -> None:
     if not span.is_recording():
         return
     ### YOUR CODE HERE (HW2)
-    raise NotImplementedError(
-        "HW2: add authenticated caller and permission attributes to the tool span"
-    )
-
+    span.set_attribute("cartwheel.user_role", ctx.role)          # e.g. "shopper"
+    span.set_attribute("cartwheel.user_id", str(ctx.user_id))    # str() turns 1 into "1"
+    if ctx.role == "merchant":                                   # only merchants have a store
+        span.set_attribute("cartwheel.store_id", str(ctx.store_id))
+    _set_permission_denied_attributes(span, result) 
 
 def _set_permission_denied_attributes(
     span: trace.Span, result: dict[str, Any]
@@ -150,4 +187,8 @@ def _set_permission_denied_attributes(
     course where you touch instrumentation by hand.
     """
     ### YOUR CODE HERE (HW2)
-    raise NotImplementedError("HW2: set the cartwheel.permission_denied span attribute")
+     # .get("error") reads the "error" key, or gives None if it's missing (successes have no "error")
+    denied = isinstance(result, dict) and result.get("error") == "permission_denied"
+    span.set_attribute("cartwheel.permission_denied", denied)    # True or False, always set
+    if denied:
+        span.set_attribute("cartwheel.permission_denied.reason", result.get("reason", ""))
