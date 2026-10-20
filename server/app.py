@@ -41,7 +41,7 @@ from agent import db
 from agent.agent import build_agent, prompt_version
 from agent.auth import ROLES, AuthContext
 from agent.config import REPO_ROOT, db_path
-from observability.instrument import load_env, setup_tracing
+from observability.instrument import flush_tracing, load_env, setup_tracing, trace_context
 
 MAX_TURNS = 12  # cap runaway loops; keeps conversations bounded
 SESSIONS_DB = REPO_ROOT / ".sessions.db"
@@ -54,6 +54,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     load_env()
     setup_tracing()  # no-op with a warning if LANGFUSE_PUBLIC_KEY is unset
     yield
+    flush_tracing()  # send buffered spans before uvicorn exits
 
 
 app = FastAPI(title="Cartwheel support agent", lifespan=lifespan)
@@ -123,8 +124,36 @@ def create_session(body: SessionCreate) -> dict[str, Any]:
     session id and a signed token. The token payload must contain session_id,
     user_id, role, store_id, and issued_at.
     """
-    ### YOUR CODE HERE (HW2)
-    raise NotImplementedError("HW2: implement POST /sessions")
+    # 1. Is the role a real one? ROLES is ("shopper", "merchant", "support").
+    if body.role not in ROLES:
+        raise HTTPException(status_code=400, detail=f"unknown role: {body.role}")
+
+    # 2. Look the user up in the database.
+    with db.connection() as conn:
+        user = db.get_user(conn, body.user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail=f"unknown user: {body.user_id}")
+
+    # 3. Does the role they CLAIMED match the role the DATABASE stores?
+    if user.role != body.role:
+        raise HTTPException(status_code=403, detail="role does not match this user")
+
+    # 4. Build the identity from the database values, never from the request.
+    ctx = AuthContext(user_id=user.id, role=user.role, store_id=user.store_id)
+
+    # 5. Create a new session and remember it on the server (the guest list).
+    session_id = uuid.uuid4().hex
+    _SESSIONS[session_id] = (ctx, SQLiteSession(session_id, str(SESSIONS_DB)))
+
+    # 6. Sign a token (the wristband) and return it.
+    token = create_token({
+        "session_id": session_id,
+        "user_id": user.id,
+        "role": user.role,
+        "store_id": user.store_id,
+        "issued_at": int(time.time()),
+    })
+    return {"session_id": session_id, "token": token}
 
 
 def _authorize(session_id: str, authorization: str | None) -> AuthContext:
@@ -158,8 +187,47 @@ async def post_message(
     gen_ai.output.messages on the root span as JSON arrays of OTel GenAI
     messages with role and parts fields.
     """
-    ### YOUR CODE HERE (HW2)
-    raise NotImplementedError("HW2: implement the traced message endpoint")
+        # 1. Check the wristband. _authorize raises 401/403/404 itself if anything's wrong,
+    #    and otherwise returns the verified identity Part B stored.
+    ctx = _authorize(session_id, authorization)
+    session = _SESSIONS[session_id][1]          # [1] = the second item: conversation memory
+
+    # 2. Build the agent for THIS user, and fingerprint the prompt template.
+    agent = build_agent(ctx, model=body.model)
+    version = prompt_version()
+    record_content = os.environ.get("TRACELOOP_TRACE_CONTENT", "").lower() == "true"
+
+    # 3. Open the root span. Everything inside the "with" block lands in one trace.
+    with (
+        trace_context(ctx, session_id=session_id, prompt_version=version, channel="api"),
+        _tracer.start_as_current_span("cartwheel.session_message") as span,
+    ):
+        span.set_attribute("cartwheel.session_id", session_id)
+        span.set_attribute("cartwheel.user_role", ctx.role)
+        span.set_attribute("cartwheel.user_id", str(ctx.user_id))
+        span.set_attribute("cartwheel.prompt_version", version)
+        if body.scenario_id:                    # empty or missing → skip
+            span.set_attribute("cartwheel.scenario_id", body.scenario_id)
+        if record_content:
+            span.set_attribute("gen_ai.input.messages", json.dumps(
+                [{"role": "user", "parts": [{"type": "text", "content": body.message}]}]
+            ))
+
+        # 4. Run the agent as the verified user.
+        result = await Runner.run(
+            agent, body.message, session=session, context=ctx, max_turns=MAX_TURNS
+        )
+        reply = str(result.final_output)
+
+        # 5. Record the final reply while the span is still open.
+        if record_content:
+            span.set_attribute("gen_ai.output.messages", json.dumps(
+                [{"role": "assistant", "parts": [{"type": "text", "content": reply}]}]
+            ))
+
+    # 6. Send the answer back.
+    return {"session_id": session_id, "reply": reply, "prompt_version": version}
+
 
 
 @app.get("/health")

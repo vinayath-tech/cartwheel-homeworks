@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import time
 
 try:  # readline transparently upgrades input(): arrow keys, ctrl-a/e/k/w,
@@ -45,7 +46,13 @@ from agent import db
 from agent.agent import build_agent, prompt_version
 from agent.auth import AuthContext
 from agent.config import REPO_ROOT
-from observability.instrument import load_env, setup_openai_tracing, setup_tracing
+from observability.instrument import (
+    flush_tracing,
+    load_env,
+    setup_openai_tracing,
+    setup_tracing,
+    trace_context,
+)
 
 DEFAULT_USERS = {"shopper": 1, "merchant": 9001, "support": 9501}
 MAX_TURNS = 12  # cap runaway loops; keeps conversations bounded
@@ -83,6 +90,11 @@ def _print_tool_calls(new_items: list[RunItem]) -> None:
                 print(f"    -> {outputs[item.call_id]}")
 
 
+def _genai_messages(role: str, text: str) -> str:
+    """Serialize one message in the OTel GenAI format used on the root span."""
+    return json.dumps([{"role": role, "parts": [{"type": "text", "content": text}]}])
+
+
 def resolve_auth(role: str, user_id: int | None) -> AuthContext:
     """Build the auth context from the users table (the injected block)."""
     with db.connection() as conn:
@@ -106,10 +118,10 @@ async def chat(
     agent = build_agent(ctx, model=model, defenses=defenses)
     # main() enables callbacks for Langfuse or explicit OpenAI tracing.
     run_config = RunConfig(tracing_disabled=not tracing)
-    session = SQLiteSession(
-        f"cli-{ctx.role}-{ctx.user_id}-{int(time.time())}", str(SESSIONS_DB)
-    )
+    session_id = f"cli-{ctx.role}-{ctx.user_id}-{int(time.time())}"
+    session = SQLiteSession(session_id, str(SESSIONS_DB))
     version = prompt_version()
+    record_content = os.environ.get("TRACELOOP_TRACE_CONTENT", "").lower() == "true"
     print(
         f"Cartwheel support CLI | role={ctx.role} user={ctx.user_id} "
         f"store={ctx.store_id} prompt_version={version} defenses={'on' if defenses else 'off'}"
@@ -125,11 +137,17 @@ async def chat(
             continue
         if line.lower() in {"quit", "exit"}:
             return
-        with _tracer.start_as_current_span("cartwheel.session_message") as span:
+        with (
+            trace_context(ctx, session_id=session_id, prompt_version=version, channel="cli"),
+            _tracer.start_as_current_span("cartwheel.session_message") as span,
+        ):
             if span.is_recording():
                 span.set_attribute("cartwheel.user_role", ctx.role)
                 span.set_attribute("cartwheel.user_id", str(ctx.user_id))
                 span.set_attribute("cartwheel.prompt_version", version)
+                if record_content:
+                    # Root span input/output become the Langfuse trace input/output.
+                    span.set_attribute("gen_ai.input.messages", _genai_messages("user", line))
             result = await Runner.run(
                 agent,
                 line,
@@ -138,6 +156,11 @@ async def chat(
                 max_turns=MAX_TURNS,
                 run_config=run_config,
             )
+            if span.is_recording() and record_content and not getattr(result, "interruptions", None):
+                span.set_attribute(
+                    "gen_ai.output.messages",
+                    _genai_messages("assistant", str(result.final_output)),
+                )
 
         # ------------------------------------------------------------------
         # Module 4 pause and resume code (Homework 8, Part D). With defenses on,
@@ -218,9 +241,13 @@ def main() -> None:
         except ValueError as exc:
             parser.error(str(exc))
     ctx = resolve_auth(args.role, args.user)
-    asyncio.run(
-        chat(ctx, args.model, defenses=args.defenses, debug=args.debug, tracing=tracing)
-    )
+    try:
+        asyncio.run(
+            chat(ctx, args.model, defenses=args.defenses, debug=args.debug, tracing=tracing)
+        )
+    finally:
+        if args.trace:
+            flush_tracing()
 
 
 if __name__ == "__main__":

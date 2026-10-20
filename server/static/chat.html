@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartwheel Chat</title>
+<style>
+  :root {
+    --bg: #f4f5fb;
+    --bg-glow: radial-gradient(1200px 600px at 10% -10%, #e3e8ff 0%, transparent 60%),
+               radial-gradient(900px 500px at 110% 10%, #f3e6ff 0%, transparent 55%);
+    --surface: rgba(255, 255, 255, 0.82);
+    --surface-solid: #ffffff;
+    --border: rgba(20, 24, 40, 0.08);
+    --text: #161a26;
+    --muted: #6b7286;
+    --accent: #5b5bf0;
+    --accent-2: #9b5cf6;
+    --accent-grad: linear-gradient(135deg, var(--accent), var(--accent-2));
+    --on-accent: #ffffff;
+    --agent-bubble: #ffffff;
+    --chip: #eef0fb;
+    --ok: #16a36a;
+    --danger: #d23f4a;
+    --danger-bg: #fdecee;
+    --shadow: 0 1px 2px rgba(16, 20, 40, 0.04), 0 8px 24px rgba(16, 20, 40, 0.06);
+    --radius: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0f17;
+      --bg-glow: radial-gradient(1200px 600px at 10% -10%, #1d2050 0%, transparent 60%),
+                 radial-gradient(900px 500px at 110% 10%, #2c1a4a 0%, transparent 55%);
+      --surface: rgba(24, 27, 40, 0.78);
+      --surface-solid: #181b28;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #eceef6;
+      --muted: #9aa1b6;
+      --accent: #7b7bff;
+      --accent-2: #b083ff;
+      --on-accent: #0d0f17;
+      --agent-bubble: #1f2334;
+      --chip: #23273a;
+      --ok: #3ad08f;
+      --danger: #ff7d86;
+      --danger-bg: #3a1c22;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg-glow), var(--bg);
+    background-attachment: fixed;
+    color: var(--text);
+    font: 15px/1.55 "Inter", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app {
+    max-width: 820px; height: 100%; margin: 0 auto; padding: 16px;
+    display: grid; grid-template-rows: auto auto 1fr auto; gap: 14px;
+  }
+
+  /* Header */
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 650; font-size: 17px; letter-spacing: -0.01em; }
+  .logo {
+    width: 34px; height: 34px; border-radius: 10px; background: var(--accent-grad);
+    display: grid; place-items: center; color: #fff; box-shadow: var(--shadow);
+  }
+  .brand small { display: block; font-weight: 500; font-size: 12px; color: var(--muted); letter-spacing: 0; }
+  .status { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .dot.ok { background: var(--ok); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 20%, transparent); }
+  .dot.down { background: var(--danger); }
+
+  /* Cards */
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .setup { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .field-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .segmented {
+    display: inline-flex; padding: 3px; gap: 2px; border-radius: 12px;
+    background: var(--chip); border: 1px solid var(--border);
+  }
+  .segmented button {
+    border: 0; background: transparent; color: var(--muted); font: inherit; font-weight: 550;
+    padding: 6px 14px; border-radius: 9px; cursor: pointer; transition: all .15s ease;
+  }
+  .segmented button[aria-pressed="true"] { background: var(--surface-solid); color: var(--text); box-shadow: var(--shadow); }
+
+  .id-field {
+    display: inline-flex; align-items: center; gap: 6px; padding: 0 4px 0 12px; border-radius: 12px;
+    background: var(--surface-solid); border: 1px solid var(--border);
+  }
+  .id-field span { color: var(--muted); font-size: 13px; }
+  .id-field input {
+    width: 6.5em; border: 0; outline: 0; background: transparent; color: var(--text);
+    font: inherit; padding: 8px 6px;
+  }
+  .btn {
+    border: 0; border-radius: 12px; padding: 9px 16px; font: inherit; font-weight: 600; cursor: pointer;
+    background: var(--accent-grad); color: #fff; box-shadow: var(--shadow); transition: transform .1s ease, opacity .15s;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:disabled { opacity: .55; cursor: default; transform: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .session { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-height: 28px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
+    background: var(--chip); color: var(--muted); font-size: 12.5px; border: 1px solid var(--border);
+  }
+  .chip b { color: var(--text); font-weight: 600; font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 12px; }
+  .chip.role { background: var(--accent-grad); color: #fff; border: 0; font-weight: 600; }
+  button.chip { cursor: pointer; font: inherit; font-size: 12.5px; }
+  a.chip { text-decoration: none; color: var(--accent); font-weight: 600; }
+  .hint { color: var(--muted); font-size: 13.5px; }
+
+  /* Chat */
+  .chat { padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+  .welcome { margin: auto; text-align: center; max-width: 420px; color: var(--muted); }
+  .welcome .big {
+    width: 56px; height: 56px; margin: 0 auto 10px; border-radius: 18px; background: var(--accent-grad);
+    display: grid; place-items: center; color: #fff; box-shadow: var(--shadow);
+  }
+  .welcome h2 { margin: 0 0 4px; color: var(--text); font-size: 18px; letter-spacing: -0.01em; }
+
+  .msg { display: flex; gap: 10px; align-items: flex-end; max-width: 88%; animation: rise .22s ease-out; }
+  .msg.you { align-self: flex-end; flex-direction: row-reverse; }
+  .avatar {
+    flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+    font-size: 12px; font-weight: 700; color: #fff; background: var(--accent-grad);
+  }
+  .msg.agent .avatar { background: var(--text); color: var(--bg); }
+  .bubble {
+    padding: 10px 14px; border-radius: 18px; white-space: pre-wrap; word-wrap: break-word;
+    box-shadow: var(--shadow); border: 1px solid var(--border);
+  }
+  .you .bubble { background: var(--accent-grad); color: #fff; border: 0; border-bottom-right-radius: 6px; }
+  .agent .bubble { background: var(--agent-bubble); border-bottom-left-radius: 6px; }
+  .time { font-size: 11px; color: var(--muted); margin: 0 4px 2px; white-space: nowrap; }
+  .msg.error { align-self: stretch; max-width: 100%; }
+  .msg.error .bubble { background: var(--danger-bg); color: var(--danger); border-color: transparent; width: 100%; }
+  .msg.error .avatar { background: var(--danger); color: #fff; }
+
+  .typing .bubble { display: inline-flex; gap: 4px; padding: 14px 16px; }
+  .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite ease-in-out; }
+  .typing i:nth-child(2) { animation-delay: .15s; }
+  .typing i:nth-child(3) { animation-delay: .3s; }
+  @keyframes blink { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* Composer */
+  .composer { display: flex; flex-direction: column; gap: 10px; }
+  .suggestions { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+  .suggestions::-webkit-scrollbar { display: none; }
+  .suggestions button {
+    flex: none; border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    padding: 7px 12px; border-radius: 999px; font: inherit; font-size: 13px; cursor: pointer;
+    backdrop-filter: blur(8px); transition: border-color .15s, transform .1s;
+  }
+  .suggestions button:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .bar { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 16px; border-radius: 999px; }
+  .bar input {
+    flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text);
+    font: inherit; padding: 8px 0;
+  }
+  .send {
+    flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer;
+    background: var(--accent-grad); color: #fff; display: grid; place-items: center;
+    transition: transform .1s, opacity .15s;
+  }
+  .send:hover { transform: scale(1.05); }
+  .send:disabled { opacity: .45; cursor: default; transform: none; }
+
+  @media (max-width: 560px) {
+    .app { padding: 12px; gap: 10px; }
+    .msg { max-width: 96%; }
+    .brand small { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/></svg>
+      </div>
+      <div>Cartwheel Support<small>Traced to Langfuse on every message</small></div>
+    </div>
+    <span class="status"><span id="statusDot" class="dot"></span><span id="statusText">Checking server…</span></span>
+  </header>
+
+  <section class="card setup" aria-label="Session">
+    <div class="controls">
+      <span class="field-label">Role</span>
+      <div class="segmented" id="roles" role="group" aria-label="Role">
+        <button type="button" data-role="shopper" aria-pressed="true">Shopper</button>
+        <button type="button" data-role="merchant" aria-pressed="false">Merchant</button>
+        <button type="button" data-role="support" aria-pressed="false">Support</button>
+      </div>
+      <label class="id-field"><span>User ID</span><input id="userId" type="number" min="1" value="1"></label>
+      <button id="start" class="btn">Start session</button>
+    </div>
+    <div class="session" id="sessionInfo"><span class="hint">Pick a role and start a session to chat.</span></div>
+  </section>
+
+  <section class="card chat" id="log" aria-live="polite">
+    <div class="welcome" id="welcome">
+      <div class="big" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <h2>Talk to the Cartwheel agent</h2>
+      The server verifies who you are before every message, and each turn shows up as a trace in Langfuse.
+    </div>
+  </section>
+
+  <div class="composer">
+    <div class="suggestions" id="suggestions" aria-label="Example messages"></div>
+    <form class="card bar" id="sendForm">
+      <input id="message" placeholder="Start a session to chat…" autocomplete="off" disabled aria-label="Message">
+      <button id="send" class="send" disabled aria-label="Send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const DEFAULT_USER = { shopper: 1, merchant: 9002, support: 9501 };
+  const SUGGESTIONS = {
+    shopper: [
+      "Show my recent orders.",
+      "Hi, What is the status of my order #4127?",
+      "I would like to return order #3980 and get my money back.",
+    ],
+    merchant: [
+      "Show my store's recent orders.",
+      "Can you show me the details of order 4127?",
+    ],
+    support: [
+      "A customer bought from Saltbox pantry 10 days ago. Can they still return it?",
+      "Can you tell me nice places to visit in London?",
+    ],
+  };
+  let role = "shopper";
+  let session = null;            // { id, token, role, userId }
+  let langfuseProjectUrl = null;
+
+  // Server status + Langfuse link config.
+  fetch("/health").then((r) => r.json()).then((h) => {
+    $("statusDot").className = "dot ok";
+    $("statusText").textContent = `Connected · ${h.active_sessions} active session${h.active_sessions === 1 ? "" : "s"}`;
+  }).catch(() => {
+    $("statusDot").className = "dot down";
+    $("statusText").textContent = "Server unreachable";
+  });
+  fetch("/ui/config").then((r) => r.json())
+    .then((c) => { langfuseProjectUrl = c.langfuse_project_url; })
+    .catch(() => {});
+
+  const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  const timeNow = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  function el(tag, props = {}, ...children) {
+    const node = Object.assign(document.createElement(tag), props);
+    node.append(...children);
+    return node;
+  }
+
+  // Role picker.
+  $("roles").addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-role]");
+    if (!button) return;
+    role = button.dataset.role;
+    for (const b of $("roles").querySelectorAll("button")) b.setAttribute("aria-pressed", String(b === button));
+    $("userId").value = DEFAULT_USER[role];
+    endSession();
+  });
+  $("userId").addEventListener("input", endSession);
+
+  // A session is bound to the identity the server verified at start. Changing
+  // the picker must not leave the old session's token in use under a new label.
+  function endSession() {
+    if (!session) return;
+    const previous = `${capitalize(session.role)} ${session.userId}`;
+    session = null;
+    setComposer(false);
+    $("suggestions").replaceChildren();
+    $("message").placeholder = "Start a session to chat…";
+    $("sessionInfo").replaceChildren(el("span", { className: "hint",
+      textContent: `Session for ${previous} ended. Start a new session as ${capitalize(role)} ${$("userId").value || "…"}.` }));
+  }
+
+  function renderSuggestions() {
+    const box = $("suggestions");
+    box.replaceChildren();
+    if (!session) return;
+    for (const text of SUGGESTIONS[session.role] || []) {
+      const button = el("button", { type: "button", textContent: text });
+      button.addEventListener("click", () => send(text));
+      box.append(button);
+    }
+  }
+
+  function addMessage(kind, text) {
+    $("welcome")?.remove();
+    const initials = kind === "you" ? (session ? capitalize(session.role)[0] : "Y") : kind === "agent" ? "AI" : "!";
+    const row = el("div", { className: `msg ${kind}` },
+      el("div", { className: "avatar", textContent: initials, ariaHidden: "true" }),
+      el("div", { className: "bubble", textContent: text }),
+      el("span", { className: "time", textContent: timeNow() }),
+    );
+    $("log").append(row);
+    $("log").scrollTop = $("log").scrollHeight;
+    return row;
+  }
+
+  function showTyping() {
+    const row = el("div", { className: "msg agent typing" },
+      el("div", { className: "avatar", textContent: "AI", ariaHidden: "true" }),
+      el("div", { className: "bubble", ariaLabel: "Agent is typing" }, el("i"), el("i"), el("i")),
+    );
+    $("log").append(row);
+    $("log").scrollTop = $("log").scrollHeight;
+    return row;
+  }
+
+  function showSession(promptVersion) {
+    const info = $("sessionInfo");
+    info.replaceChildren(el("span", { className: "chip role", textContent: `${capitalize(session.role)} ${session.userId}` }));
+    const copy = el("button", { type: "button", className: "chip", title: "Copy session ID" },
+      "session ", el("b", { textContent: session.id.slice(0, 8) + "…" }));
+    copy.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(session.id); copy.lastChild.textContent = "copied ✓"; }
+      catch { copy.lastChild.textContent = session.id; }
+      setTimeout(() => { copy.lastChild.textContent = session.id.slice(0, 8) + "…"; }, 1500);
+    });
+    info.append(copy);
+    if (promptVersion) info.append(el("span", { className: "chip" }, "prompt ", el("b", { textContent: promptVersion })));
+    if (langfuseProjectUrl) {
+      info.append(el("a", {
+        className: "chip", href: `${langfuseProjectUrl}/sessions/${session.id}`,
+        target: "_blank", rel: "noopener", textContent: "Open in Langfuse ↗",
+      }));
+    }
+  }
+
+  async function postJson(url, body, token) {
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const response = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const detail = typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail ?? data);
+      throw new Error(`HTTP ${response.status} · ${detail}`);
+    }
+    return data;
+  }
+
+  function setComposer(enabled) {
+    $("message").disabled = $("send").disabled = !enabled;
+    for (const b of $("suggestions").querySelectorAll("button")) b.disabled = !enabled;
+  }
+
+  $("start").addEventListener("click", async () => {
+    const userId = Number($("userId").value);
+    $("start").disabled = true;
+    try {
+      const data = await postJson("/sessions", { user_id: userId, role });
+      session = { id: data.session_id, token: data.token, role, userId };
+      $("log").replaceChildren();
+      showSession();
+      renderSuggestions();
+      $("message").placeholder = `Message as ${capitalize(role)} ${userId}…`;
+      setComposer(true);
+      $("message").focus();
+    } catch (err) {
+      addMessage("error", `Session refused · ${err.message}`);
+    } finally {
+      $("start").disabled = false;
+    }
+  });
+
+  async function send(text) {
+    text = text.trim();
+    if (!text || !session) return;
+    addMessage("you", text);
+    $("message").value = "";
+    setComposer(false);
+    const typing = showTyping();
+    const current = session;
+    try {
+      const data = await postJson(`/sessions/${current.id}/messages`, { message: text }, current.token);
+      typing.remove();
+      addMessage("agent", data.reply);
+      if (session === current) showSession(data.prompt_version);
+    } catch (err) {
+      typing.remove();
+      addMessage("error", `Request failed · ${err.message}`);
+    } finally {
+      // Re-enable only if the user has not switched identity meanwhile.
+      setComposer(session === current);
+      if (session === current) $("message").focus();
+    }
+  }
+
+  $("sendForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    send($("message").value);
+  });
+</script>
+</body>
+</html>
