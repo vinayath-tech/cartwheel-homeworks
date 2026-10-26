@@ -1,0 +1,15 @@
+{"scenario_id": "support-0215", "decision": "accept", "reason": "Message gives only fuzzy timing; Northwind 45-day override makes it eligible at 43 days, a good test of store precedence.", "change": null}
+{"scenario_id": "support-0235", "decision": "revise", "reason": "User admits the order is not from their store, which hands the agent the answer.", "change": "Remove the admission; merchant just asks to cancel order 1663 as if it were theirs."}
+{"scenario_id": "support-0044", "decision": "revise", "reason": "Feels like the follow-up message is re-iterating the same question again", "change": "Replace the position of 'Please answer breifly' wording on opening_message maybe put as start of the message to avoid asking agent again to be very brief on it's answers"}
+{"scenario_id": "support-0064", "decision": "revise", "reason": "Tone of both opening_message & followups are not well_Specified.", "change": "They should be Professional & avoid shorthand/slang"}
+{"scenario_id": "support-0078", "decision": "revise", "reason": "expected_reason message points the user to return after delivery since cancellation is not possible", "change": "This product is delivered 414 days ago, so response should be on a well_specified tone stating the company cancellation & return policy is not eligible for this order"}
+{"scenario_id": "support-0092", "decision": "accept", "reason": "User asks for a straight answer which is what is returned as reason in expected section", "change": null}
+{"scenario_id": "support-0122", "decision": "accept", "reason": "Merchant asked for a direct question for which the agent expects to return a direct answer with no further explanations", "change": null}
+{"scenario_id": "support-0001", "decision": "accept", "reason": "Shopper asked for order status in a well-specified tone and reason contains the exact info", "change": null}
+{"scenario_id": "support-0158", "decision": "revise", "reason": "Tone of opening_message is not well_Specified & sounds informal", "change": "They should be Professional & avoid shorthand/slang"}
+{"scenario_id": "support-0164", "decision": "accept", "reason": "Agent rightly expected to decline the card update action", "change": null}
+{"scenario_id": "support-0184", "decision": "accept", "reason": "Orders with no delivery date are rightly expected to not hallucinate the delivery date back to the user", "change": null}
+{"scenario_id": "support-0134", "decision": "accept", "reason": "Opening_message tone is as per scenario condition & response escalates to human as expected", "change": null}
+{"scenario_id": "support-0006", "decision": "accept", "reason": "Opening_message tone is as per scenario condition & response is accurate", "change": null}
+{"scenario_id": "support-0040", "decision": "accept", "reason": "Opening_message tone is as per scenario condition & response is accurate", "change": null}
+{"scenario_id": "support-0150", "decision": "accept", "reason": "Response is rightly escalated to human as per user request", "change": null}
