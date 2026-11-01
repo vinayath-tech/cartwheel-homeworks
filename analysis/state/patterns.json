@@ -1,1 +1,863 @@
-{"modes": []}
+{
+  "modes": [
+    {
+      "name": "policy_answer_missing_specifics",
+      "status": "final",
+      "definition": "Fail when the reply answers a policy-governed question (return window, refund or return refusal, escalation timing) without stating the deciding value the tool or policy supplied (window length, cutoff, days remaining, SLA), states a value that contradicts the policy, or omits the policy identifier.",
+      "boundary": "Not a failure when the reply gives the deciding value from the policy and the policy id, even if brief. A refusal that rests on a record the seed marks as inconsistent is invalid_record_presented_as_valid.",
+      "requirement": "RESP-1, RESP-5",
+      "evaluator": "llm_judge (needs the tool result and policy text as context)",
+      "positive_trace_ids": [
+        "18b24ae343ba4ffc5294724d6a6bdd3a",
+        "ca97417cc54394954eaeb1c48ceb17f6",
+        "baa537fff34d9e425ec4e90ec01f8e2c",
+        "a634bff37ce2382a11a2332c87aeb91a",
+        "64e0481182ef91ac2bf648addfc887aa",
+        "7f0fdbd979874a03856a14ce41354b01"
+      ],
+      "close_negative_trace_ids": [
+        "2e37c38f406b1cfa10e779feb0474ca0",
+        "732309d1b29f1c9f3e1331965b45d709",
+        "33db5c56e12caa0aacb9fe3da58089f2"
+      ],
+      "part_a_example_trace_ids": [],
+      "created_from": [
+        "amvs49rrj8520",
+        "amvs4azk86345",
+        "amvsbvjsa9342",
+        "amvsrsi8m8896",
+        "amvu5hk188243",
+        "amvv1h7pp9627"
+      ],
+      "history": [
+        {
+          "ts": "2026-10-28T23:01:56.196788+00:00",
+          "batch": "batch1",
+          "change": "created in Batch 1 axial coding from 0224t1, 0224t2, 0209t1"
+        },
+        {
+          "ts": "2026-10-28T23:01:56.196788+00:00",
+          "batch": "batch1",
+          "change": "reviewer decision: missing value and missing citation merged into one mode (one prompt fix covers both)"
+        },
+        {
+          "ts": "2026-10-29T00:14:14.027851+00:00",
+          "batch": "batch2",
+          "change": "reviewer decision 2a: widened to cover values that contradict the policy (0109: SLA stated as 'hours to days' vs 24h)"
+        },
+        {
+          "ts": "2026-10-30T00:21:53.466927+00:00",
+          "batch": "batch3",
+          "change": "added 0030 t2 (cw-returns applied without policy id; pointed the user to a store policy that does not exist, reviewer decision)"
+        },
+        {
+          "ts": "2026-10-30T14:21:07.105644+00:00",
+          "batch": "lock-review",
+          "change": "added 0105 t1 (SLA answerable from cw-escalations, agent escalated instead; consistent with 0109)"
+        },
+        {
+          "ts": "2026-11-01T07:37:57.056183+00:00",
+          "batch": "freeze",
+          "change": "taxonomy frozen for Part E (reviewer approved)"
+        }
+      ]
+    },
+    {
+      "name": "invalid_record_presented_as_valid",
+      "status": "final",
+      "definition": "Fail when the reply presents a record the seed marks as invalid (data_quality_cases: negative price, missing title, inconsistent dates) as if it were normal, including silently correcting it.",
+      "boundary": "Not a failure when the reply flags the problem or declines to use the bad value.",
+      "requirement": "RESP-3",
+      "evaluator": "code (data_quality_cases entity ids in tool results) + llm_judge on the reply",
+      "positive_trace_ids": [
+        "1397736dee13b483a0272eab9acf4d53",
+        "e6207421eb38d3fd737487a2dae95733",
+        "36fcf0816caccb1feea0f1f4ec421004",
+        "54dfb8c6caeeb9e47a19e2018edadabb"
+      ],
+      "close_negative_trace_ids": [
+        "c98bae48a576b36afa7e0c03a8a3edbd",
+        "a98de72fcf4f0d3dd79a0ad52cd2e971",
+        "36bf85602ca154d65e6c6265e17e06c2",
+        "c3938c5448ab619beee279476479c328",
+        "afc5cdf5e373755b8a41a4d1863f00f1"
+      ],
+      "part_a_example_trace_ids": [],
+      "created_from": [
+        "amvsc2s2d2144",
+        "amvspcepa2685",
+        "amvsrbsww4078",
+        "amvsrxizy9436",
+        "amvu7if5g3596",
+        "amvv1oifl587"
+      ],
+      "history": [
+        {
+          "ts": "2026-10-28T23:01:56.196788+00:00",
+          "batch": "batch1",
+          "change": "created in Batch 1 axial coding from 0204t1, 0204t2"
+        },
+        {
+          "ts": "2026-10-29T00:14:14.027851+00:00",
+          "batch": "batch2",
+          "change": "reviewer decision: order 8003 (dq-order-store-mismatch) treated as a normal record; first failure placed here rather than in policy_answer_missing_specifics"
+        },
+        {
+          "ts": "2026-10-30T00:21:53.466927+00:00",
+          "batch": "batch3",
+          "change": "added 0176 (order 8001, dq-order-reversed-dates, timeline asserted); close negatives from the dq_entity search"
+        },
+        {
+          "ts": "2026-10-30T14:21:07.105644+00:00",
+          "batch": "lock-review",
+          "change": "added 0180 t1 (order 8001 timeline asserted before the lock; reviewer decision for consistency with 0176)"
+        },
+        {
+          "ts": "2026-11-01T07:37:57.056183+00:00",
+          "batch": "freeze",
+          "change": "taxonomy frozen for Part E (reviewer approved)"
+        },
+        {
+          "ts": "2026-11-01T16:11:59.763318+00:00",
+          "batch": "part-e",
+          "change": "re-judged as Pass during Part E labelling (reviewer): 0188 t1, 0190 t1; removed from positives so patterns.json matches labels/"
+        }
+      ]
+    },
+    {
+      "name": "missed_escalation",
+      "status": "final",
+      "definition": "Fail when the request falls in an escalation category (dispute, unresolvable from the help center, or unclear whether policy allows the action) and the agent neither escalates nor offers to.",
+      "boundary": "Not a failure when the agent escalates or offers to, including an attempt that fails for a harness reason. Ambiguity about which order or item the user means is acts_on_assumed_target.",
+      "requirement": "ESC-3, ESC-4",
+      "evaluator": "llm_judge",
+      "positive_trace_ids": [
+        "a98de72fcf4f0d3dd79a0ad52cd2e971",
+        "154c73b2610e0d2c6388d3bb243d2091",
+        "ae37e1ddd1b9175e7c3e4a669d3f23a7",
+        "c6627ae507ad827a97e29855517e1749",
+        "335de96d03dc9defa9235db93893c41d"
+      ],
+      "close_negative_trace_ids": [
+        "17991cdeac531a420b4d348e2f0845d1",
+        "b398526202fb0086b31d6a0eda7f8fd6",
+        "6ee0653bf400df51f4677cea1655deba",
+        "0d42c3cfdabf59b30f3e0fe2690d9c59"
+      ],
+      "part_a_example_trace_ids": [],
+      "created_from": [
+        "amvs4venw9750",
+        "amvsbl3v49090",
+        "amvsp4k912312",
+        "amvsrfq793935",
+        "amvsrkttx4623"
+      ],
+      "history": [
+        {
+          "ts": "2026-10-28T23:01:56.196788+00:00",
+          "batch": "batch1",
+          "change": "created in Batch 1 axial coding from 0184t1, 0184t2, 0093t1"
+        },
+        {
+          "ts": "2026-10-29T00:14:14.027851+00:00",
+          "batch": "batch2",
+          "change": "added from Batch 2 (reviewer's ESC-3 notes)"
+        },
+        {
+          "ts": "2026-10-31T08:34:35.369311+00:00",
+          "batch": "axial-merge",
+          "change": "close negatives 0131 t1, 0136 t1, 0004 t2 (reviewer approved): each calls escalate_to_human for a dispute or urgent case and hits the harness lock"
+        },
+        {
+          "ts": "2026-11-01T07:37:57.056183+00:00",
+          "batch": "freeze",
+          "change": "taxonomy frozen for Part E (reviewer approved)"
+        }
+      ]
+    },
+    {
+      "name": "acts_on_assumed_target",
+      "status": "final",
+      "definition": "Fail when the agent picks an order, item or product interpretation the user never identified and proceeds on it (eligibility, refund amount, search) instead of asking.",
+      "boundary": "Not a failure when the user identified the target, or the agent asks before acting.",
+      "requirement": "ESC-4, RESP-3",
+      "evaluator": "llm_judge",
+      "positive_trace_ids": [
+        "8b5dc4995b8f30d1c7dec5b9dd8091dc",
+        "cfbad4e11d22b4e96eb59408a25efe6b",
+        "de9dc432c53f4b0c657a370069a3f2b5",
+        "8c26380580afa402c545ff0c6643ff57"
+      ],
+      "close_negative_trace_ids": [
+        "5c858317e383273a5c422c43581bc8a7",
+        "5754eb6e8e922d72d010cce923a05dc7",
+        "ba40267183fee238610e773acc7948ed",
+        "1c766e0e485ebe480bcbf047e8404050",
+        "61a4ea8d2a40b8eecbc5b98614fdcbb9",
+        "1e39298ba433c4f6ec443ff1bc17abe2",
+        "1e710fadeab9a46048453619fb2422eb"
+      ],
+      "part_a_example_trace_ids": [
+        "3c82f2f20cde1fba9a991578d8b3916d"
+      ],
+      "created_from": [
+        "amvscme091945",
+        "amvsp8csi2058",
+        "amvsp9hh42670",
+        "lf-cmvpxnhg6002npe07iexkmitr",
+        "amvu59xru4458"
+      ],
+      "history": [
+        {
+          "ts": "2026-10-28T23:01:56.196788+00:00",
+          "batch": "batch1",
+          "change": "created in Batch 1 axial coding from 0245t1, 0245t2, 0245t3"
+        },
+        {
+          "ts": "2026-10-28T23:01:56.196788+00:00",
+          "batch": "batch1",
+          "change": "reviewer decision: 0245 grouped here, not missed_escalation (the fix is a clarifying question)"
+        },
+        {
+          "ts": "2026-10-28T23:18:17.389691+00:00",
+          "batch": "batch1",
+          "change": "linked Part A open code(s) lf-cmvpxnhg6002npe07iexkmitr"
+        },
+        {
+          "ts": "2026-10-30T00:21:53.466927+00:00",
+          "batch": "batch3",
+          "change": "added 0244 (picked order 6427 unasked) and 0116 (invented a $25 cap; the 'none under $25' claim is true, so not false_absence_claim, reviewer decision)"
+        },
+        {
+          "ts": "2026-10-30T17:21:20.873681+00:00",
+          "batch": "agentdebug",
+          "change": "0116 moved to search_arguments_misexpress_request (an invented price cap is a search-argument error); this mode keeps assumptions about which order or item"
+        },
+        {
+          "ts": "2026-11-01T07:34:08.682254+00:00",
+          "batch": "part-d-CN1",
+          "change": "7 close negatives accepted from search CN1 (1 rejected: 0026 t1). They resemble the mode (no order id, many orders, or a clarifying question) but the user identified the target or the agent asked or listed instead of picking."
+        },
+        {
+          "ts": "2026-11-01T07:37:57.056183+00:00",
+          "batch": "freeze",
+          "change": "taxonomy frozen for Part E (reviewer approved)"
+        }
+      ]
+    },
+    {
+      "name": "unrequested_eligibility_verdict",
+      "status": "final",
+      "definition": "Fail when the reply volunteers a refund or return eligibility verdict the user did not ask about.",
+      "boundary": "Not a failure when the user asked about refunds or returns, or the verdict is needed to answer the question that was asked (e.g. a cancellation that depends on it).",
+      "requirement": "RESP-5 (explain the relevant decision)",
+      "evaluator": "llm_judge",
+      "positive_trace_ids": [
+        "2b83805be318e76f067fe58ef7fd1d7a",
+        "b6470a52a4b9a5b2e5637e6044e95cd9",
+        "73005df151151bfa08aa6b3717014cb9"
+      ],
+      "close_negative_trace_ids": [
+        "e01011403141edc1c8aecf9450f1acbf",
+        "26f28953a516b7a7e8cca1ab44e77553",
+        "3c8c4633da5528c91eb9ac4a5a177dcc",
+        "7a126de4d15b616b0d09e20deaada606",
+        "9bc284316a4781e365887f1a4da8107b"
+      ],
+      "part_a_example_trace_ids": [],
+      "created_from": [
+        "amvsp0px54489",
+        "amvsrv2yd954",
+        "amvu5chiz5438"
+      ],
+      "history": [
+        {
+          "ts": "2026-10-29T00:14:14.027851+00:00",
+          "batch": "batch2",
+          "change": "created from parked 0004 t1 once 0020 t1 showed the same failure (reviewer decision 1)"
+        },
+        {
+          "ts": "2026-10-30T00:21:53.466927+00:00",
+          "batch": "batch3",
+          "change": "added 0006; close negatives from the refund_unasked search"
+        },
+        {
+          "ts": "2026-11-01T07:37:57.056183+00:00",
+          "batch": "freeze",
+          "change": "taxonomy frozen for Part E (reviewer approved)"
+        }
+      ]
+    },
+    {
+      "name": "search_arguments_misexpress_request",
+      "status": "final",
+      "definition": "Fail when a search_products call uses arguments the request does not support: a store the user named is put in query (which matches titles) with store left null, or a store id is passed as the store name; query holds a category or topic word rather than words from the product title; or max_price_usd (or another filter) is set to a value the user never stated, including a number inferred from a vague word such as 'affordable'.",
+      "boundary": "Not a failure when each argument carries only what the user asked for, in the field meant for it, even if the search returns nothing. Choosing which order the user means is acts_on_assumed_target; misreading an order-lookup result is order_list_misreported.",
+      "requirement": "TOOLUSE-1 (SPEC revision)",
+      "evaluator": "code (compare arguments with the user's stated constraints and the catalog's categories and store names) + llm_judge for unstated constraints",
+      "positive_trace_ids": [
+        "5c2fbbeeb2c333dca168acf3db145247",
+        "75f94435cca0ef4718d118b0881e9907",
+        "d8dd88b039ab2739902573efdbbf0e71",
+        "25af1826f2375232fd7845c1fbfd9b6d",
+        "48eab4630d98d3e7a7cb5e67a1cb1466",
+        "335de96d03dc9defa9235db93893c41d",
+        "07a5cd89418535ecc8ad16c222457873",
+        "4f11e99bbea2c18d00b4d27433cc8bf4",
+        "c98bae48a576b36afa7e0c03a8a3edbd",
+        "56d6a2d8f0c26bd071e31ee4849da0d9",
+        "7931104dec1e2a09409c2fb3c7fb5bf7",
+        "4d283fb678c909da6aeeff2e77253ecf",
+        "dc096fbc83550f5a5d188885468b9f6d",
+        "658c8006d859aa4902f2ba3741ab873b",
+        "665687e077e05422c301cc6deaf17870",
+        "36bf85602ca154d65e6c6265e17e06c2"
+      ],
+      "close_negative_trace_ids": [
+        "9642edd671d55dc9384fdbf56ce78865",
+        "045241ce1199f62c11c323db450edb50",
+        "e1a1e296ffbf606667e402403f80e520",
+        "1397736dee13b483a0272eab9acf4d53",
+        "e6207421eb38d3fd737487a2dae95733",
+        "ee7dafcb4314f1ce8f49611d8365dd82",
+        "c341464b6b4f3ff85173b5d6b586b892",
+        "c3938c5448ab619beee279476479c328"
+      ],
+      "part_a_example_trace_ids": [],
+      "created_from": [
+        "amvs5shge7057",
+        "amvss0nvc2032",
+        "amvss18xx5720",
+        "amvu6vnu73958",
+        "amvu7205o6489",
+        "amvu76j401607",
+        "a-pd-R1-07a5cd894185",
+        "a-pd-R1-4f11e99bbea2",
+        "a-pd-R1-c98bae48a576",
+        "a-pd-R1-56d6a2d8f0c2",
+        "a-pd-R1-7931104dec1e",
+        "a-pd-R1-4d283fb678c9",
+        "a-pd-R1-dc096fbc8355",
+        "a-pd-R1-658c8006d859",
+        "a-pd-R1-665687e077e0",
+        "a-pd-R1-36bf85602ca1"
+      ],
+      "history": [
+        {
+          "ts": "2026-10-30T17:21:20.873681+00:00",
+          "batch": "agentdebug",
+          "change": "replaces false_absence_claim (reviewer approved). AgentDebug's Action/Parameter Error showed six notes describing bad search arguments, filed by outcome: 0127, 0128, 0115 (category as keyword), 0116, 0128 (unstated price cap), 0125, 0202 (store id as name). One product change, a clearer search interface, fixes all six."
+        },
+        {
+          "ts": "2026-10-30T17:21:20.873681+00:00",
+          "batch": "agentdebug",
+          "change": "0202 included on the reviewer's approval; its open code is about escalation, so it supplies no originating annotation here. 0116 moved from acts_on_assumed_target."
+        },
+        {
+          "ts": "2026-11-01T07:34:08.682254+00:00",
+          "batch": "part-d-R1",
+          "change": "Late-mode recheck R1 over every reviewed search_products trace: 10 accepted, 4 rejected (now close negatives). Definition revised to name the cases the reviewer decided: store name in query with store null (0205, 0197, 0114 ...), and a cap inferred from a vague word (0113, flipped to accepted for consistency with 0116, 0128).",
+          "previous_definition": "Fail when a search_products call uses arguments the request does not support: a category word the search cannot match (it searches titles), a store id passed as the store name, or a price cap or other constraint the user never stated.",
+          "previous_boundary": "Not a failure when the arguments carry only what the user asked for, even if the search returns nothing. Picking which order the user means is acts_on_assumed_target; misreading a good order lookup is item_in_results_reported_missing."
+        },
+        {
+          "ts": "2026-11-01T07:37:57.056183+00:00",
+          "batch": "spec-revision",
+          "change": "requirement: Proposed SPEC addition (tool-argument fidelity); RESP-3 when the reply then reports no match -> TOOLUSE-1 (SPEC revision)"
+        },
+        {
+          "ts": "2026-11-01T07:37:57.056183+00:00",
+          "batch": "freeze",
+          "change": "taxonomy frozen for Part E (reviewer approved)"
+        }
+      ]
+    },
+    {
+      "name": "order_list_misreported",
+      "definition": "Fail when the reply misstates what an order-lookup result (list_my_orders, get_order, find_order) holds for the caller: it lists fewer orders than were returned or exist without saying the list is partial, or it says an order the user named (by product, store or order id) is not among the caller's orders while the result contains it.",
+      "boundary": "Not a failure when the reply says it shows a subset (e.g. 'showing 5 of 16') or the user asked for a subset, or when the named order is really absent. Catalogue searches (search_products) and help-centre lookups are out of scope: bad search arguments are search_arguments_misexpress_request. A permission refusal does not deny an order.",
+      "requirement": "RESP-3, TOOLUSE-4 (SPEC revision)",
+      "evaluator": "code (compare order-lookup results with the orders the reply lists or denies)",
+      "status": "final",
+      "positive_trace_ids": [
+        "1e39298ba433c4f6ec443ff1bc17abe2",
+        "b0e362bb2e81dbbfcdf6317e81b383d5",
+        "5754eb6e8e922d72d010cce923a05dc7",
+        "ba40267183fee238610e773acc7948ed",
+        "61a4ea8d2a40b8eecbc5b98614fdcbb9"
+      ],
+      "close_negative_trace_ids": [
+        "5c858317e383273a5c422c43581bc8a7",
+        "ec1d2a355f3675ce373a7949a6235c60",
+        "cf8df1eee926569b6c7e5f1fdf9f888b",
+        "25af1826f2375232fd7845c1fbfd9b6d",
+        "48eab4630d98d3e7a7cb5e67a1cb1466",
+        "8afebf2bb36161880b1ca098ce6e5645",
+        "3c82f2f20cde1fba9a991578d8b3916d"
+      ],
+      "part_a_example_trace_ids": [
+        "1e710fadeab9a46048453619fb2422eb"
+      ],
+      "created_from": [
+        "amvscj04r9573",
+        "lf-cmvpw7jc30025pe07fox02t6z",
+        "amvu65a431035",
+        "amvu6ofq28803",
+        "amvu6rjfc1682",
+        "a-pd-v1-61a4ea8d2a40"
+      ],
+      "merged_from": [
+        "partial_list_presented_as_complete",
+        "item_in_results_reported_missing"
+      ],
+      "history": [
+        {
+          "ts": "2026-10-31T08:34:35.369311+00:00",
+          "batch": "axial-merge",
+          "change": "merged from partial_list_presented_as_complete and item_in_results_reported_missing (reviewer approved: one product change fixes both). Close negatives that are positives in the other parent were dropped: 1."
+        },
+        {
+          "ts": "2026-11-01T07:37:57.056183+00:00",
+          "batch": "spec-revision",
+          "change": "requirement: RESP-3; proposed: list_my_orders returns titles, a total count and a has-more flag -> RESP-3, TOOLUSE-4 (SPEC revision)"
+        },
+        {
+          "ts": "2026-11-01T07:37:57.056183+00:00",
+          "batch": "freeze",
+          "change": "taxonomy frozen for Part E (reviewer approved)"
+        }
+      ]
+    },
+    {
+      "name": "tool_failure_recovery_mishandled",
+      "definition": "Fail when, after a tool error, the agent's recovery is wrong in either of two ways: (a) the user repeats a request that failed in an earlier turn and the agent declines again without calling the tool; or (b) the caller's role is support and the reply tells them to contact customer support, a support agent, support staff or their support team.",
+      "boundary": "Not a failure when the agent retries (in the same or a later turn) and reports the result honestly, tells a support caller what to pass on to the customer, or offers to retry. Offering to retry means the agent offers to call the tool again; suggesting the caller try again later does not excuse a redirect to support (TOOLUSE-3). The harness exception itself is never the failure (Option A). Undocumented fallback channels for shopper or merchant callers are not counted (boundary decision).",
+      "requirement": "TOOLUSE-2, TOOLUSE-3 (SPEC revision)",
+      "evaluator": "code (prior-turn tool exception and no tool call this turn; caller role) + llm_judge on the reply",
+      "status": "final",
+      "positive_trace_ids": [
+        "0a5a8fca7257572411026c5de20af899",
+        "85e96ba70187ccca83087aa2ca57b001",
+        "e20b867396722cb54a05ddf713a2ca0d",
+        "ac94be268dc8e4b17449a3b4a1fa31e9",
+        "8a7561cd8fa633563573beb30b1f9be6",
+        "201137c3bb2293b424e08034be9bb4a0",
+        "4e1186aa4d29442b643ddd9cdc66badd",
+        "17991cdeac531a420b4d348e2f0845d1",
+        "7b4a683d1ac4895d74a446e2fcddc4d4",
+        "57ce52563c93961c9888245a085d7d88"
+      ],
+      "close_negative_trace_ids": [
+        "143e7c8fa9cd9304482e8b6d67afe58f",
+        "43a02bdff5fd14dfd8941fa5a5ad1e89",
+        "cf65374a556cc45023eb71a82fb9f77f",
+        "b71d49811ea37c00354f0ab6e1849a52"
+      ],
+      "part_a_example_trace_ids": [],
+      "created_from": [
+        "amvsbt5gp5117",
+        "amvsckq7c1124",
+        "amvsovfi48818",
+        "amvsowcfr5967",
+        "amvsoxdvn873",
+        "amvsr3zp33118",
+        "amvv1feum6169",
+        "amvv1lxck706",
+        "amvv1mvry8443",
+        "amvv1qr8h9667"
+      ],
+      "merged_from": [
+        "no_retry_after_tool_failure",
+        "support_caller_redirected_to_support"
+      ],
+      "history": [
+        {
+          "ts": "2026-10-31T08:34:35.369311+00:00",
+          "batch": "axial-merge",
+          "change": "merged from no_retry_after_tool_failure and support_caller_redirected_to_support (reviewer approved: one product change fixes both). Close negatives that are positives in the other parent were dropped: 1."
+        },
+        {
+          "ts": "2026-11-01T07:37:57.056183+00:00",
+          "batch": "spec-revision",
+          "change": "requirement: Proposed SPEC addition: tool-failure protocol (retry once, report honestly, role-aware fallback); RESP-5 -> TOOLUSE-2, TOOLUSE-3 (SPEC revision)"
+        },
+        {
+          "ts": "2026-11-01T07:37:57.056183+00:00",
+          "batch": "freeze",
+          "change": "taxonomy frozen for Part E (reviewer approved)"
+        },
+        {
+          "ts": "2026-11-01T16:11:59.763318+00:00",
+          "batch": "part-e",
+          "change": "re-judged as Pass during Part E labelling (reviewer): 0190 t2; removed from positives so patterns.json matches labels/"
+        },
+        {
+          "ts": "2026-11-01T16:17:41.326251+00:00",
+          "batch": "part-e",
+          "previous_boundary": "Not a failure when the agent retries (in the same or a later turn) and reports the result honestly, tells a support caller what to pass on to the customer, or offers to retry. The harness exception itself is never the failure (Option A). Undocumented fallback channels for shopper or merchant callers are not counted (boundary decision).",
+          "change": "Reviewer re-judged 0138 t1, 0139 t1 and 0190 t2 as Pass during Part E: each suggests trying again as well as redirecting the support caller. Boundary clarified to match; the three become close negatives."
+        },
+        {
+          "ts": "2026-11-01T16:21:55.689310+00:00",
+          "batch": "part-e",
+          "change": "Reviewer reversed the re-judgment: 0138 t1, 0139 t1, 0190 t2 back to Fail to match TOOLUSE-3 (kept unchanged). Boundary clarified: a try-again suggestion does not excuse a redirect."
+        }
+      ]
+    }
+  ],
+  "ungrouped_open_codes": [
+    "amvs2e2m54782",
+    "amvsqrh0h9463"
+  ],
+  "updated_at": "2026-11-01T16:21:55.689310+00:00",
+  "parked_notes": {},
+  "boundary_decisions": [
+    {
+      "ts": "2026-10-30T14:21:07.105644+00:00",
+      "decision": "An interim promise ('they will follow up shortly', 'I will open a dispute') that the same reply corrects after the tool fails is not a RESP-2 failure.",
+      "traces": [
+        "0054 t1",
+        "0105 t1",
+        "0139 t1"
+      ]
+    },
+    {
+      "ts": "2026-10-30T14:21:07.105644+00:00",
+      "decision": "Directing the user to an undocumented contact channel after a failed escalation is not counted as a failure (cw-getting-help documents only the assistant's ticket).",
+      "traces": [
+        "0004 t2",
+        "0132 t1",
+        "0135 t1"
+      ]
+    },
+    {
+      "ts": "2026-10-30T14:21:07.105644+00:00",
+      "decision": "Harness lock notes describe the test setup; each was revised to judge the agent's handling (Option A).",
+      "traces": [
+        "22 lock-affected batch traces"
+      ]
+    },
+    {
+      "ts": "2026-11-01T07:34:08.682254+00:00",
+      "mode": "search_arguments_misexpress_request",
+      "decision": "A store named in query with store=null fails; a price cap inferred from a vague word fails.",
+      "evidence": "R1 decisions; 0114 and 0113 flipped by the reviewer for consistency"
+    },
+    {
+      "ts": "2026-11-01T16:17:41.326251+00:00",
+      "mode": "tool_failure_recovery_mishandled",
+      "decision": "A suggestion to try again later excuses a redirect to support for a support caller.",
+      "evidence": "0138 t1, 0139 t1, 0190 t2 (Pass) vs 0067 t1, 0087 t1, 0140 t1/t2 (Fail: redirect with no retry)"
+    },
+    {
+      "ts": "2026-11-01T16:21:55.689310+00:00",
+      "mode": "tool_failure_recovery_mishandled",
+      "decision": "Supersedes the previous entry: suggesting the caller try again later does NOT excuse a redirect to support; offering to retry means offering to call the tool again.",
+      "evidence": "0138 t1, 0139 t1, 0190 t2 (Fail); 0180 t1 Pass (offers to escalate again, tells the support caller what the customer should do). Both readings considered; the SPEC's chosen."
+    }
+  ],
+  "retired_modes": [
+    {
+      "name": "false_absence_claim",
+      "status": "replaced",
+      "definition": "Fail when the reply says nothing matches based on a search whose arguments do not express the request (e.g. a category searched as a keyword), while matching records exist.",
+      "boundary": "Not a failure when the search arguments fit the request and the data really has no match.",
+      "requirement": "RESP-3",
+      "evaluator": "code (re-run the request against the DB) + llm_judge for argument fit",
+      "positive_trace_ids": [
+        "5c2fbbeeb2c333dca168acf3db145247",
+        "75f94435cca0ef4718d118b0881e9907",
+        "d8dd88b039ab2739902573efdbbf0e71"
+      ],
+      "close_negative_trace_ids": [
+        "07a5cd89418535ecc8ad16c222457873",
+        "9642edd671d55dc9384fdbf56ce78865",
+        "48eab4630d98d3e7a7cb5e67a1cb1466"
+      ],
+      "part_a_example_trace_ids": [],
+      "created_from": [
+        "amvs5shge7057",
+        "amvss0nvc2032",
+        "amvss18xx5720",
+        "amvu76j401607"
+      ],
+      "history": [
+        {
+          "ts": "2026-10-28T23:01:56.196788+00:00",
+          "batch": "batch1",
+          "change": "created in Batch 1 axial coding from 0127t1"
+        },
+        {
+          "ts": "2026-10-29T00:14:14.027851+00:00",
+          "batch": "batch2",
+          "change": "added from Batch 2: category 'clothing' searched as a keyword, 0 results, 6 matching items exist; the invented $30 cap is a secondary observation"
+        },
+        {
+          "ts": "2026-10-30T00:21:53.466927+00:00",
+          "batch": "batch3",
+          "change": "added 0115 ('home kitchen' searched, 9 home_and_kitchen items under $25 exist); close negatives 0117 and 0125 (claim true: Wooden Whale has 0 items under $15, reviewer decision)"
+        }
+      ],
+      "replaced_by": "search_arguments_misexpress_request",
+      "retired_at": "2026-10-30T17:21:20.873681+00:00"
+    },
+    {
+      "name": "partial_list_presented_as_complete",
+      "status": "merged",
+      "definition": "Fail when the reply lists fewer records than the tool returned, or than exist for the caller, without saying the list is partial.",
+      "boundary": "Not a failure when the reply says it shows a subset (e.g. 'showing 5 of 16') or the user asked for a subset. An empty result claimed as 'none' is false_absence_claim, not this mode.",
+      "requirement": "RESP-3",
+      "evaluator": "code (compare tool result count with records in the reply)",
+      "positive_trace_ids": [
+        "1e39298ba433c4f6ec443ff1bc17abe2"
+      ],
+      "close_negative_trace_ids": [
+        "5c858317e383273a5c422c43581bc8a7",
+        "61a4ea8d2a40b8eecbc5b98614fdcbb9",
+        "ec1d2a355f3675ce373a7949a6235c60"
+      ],
+      "part_a_example_trace_ids": [
+        "1e710fadeab9a46048453619fb2422eb"
+      ],
+      "created_from": [
+        "amvscj04r9573",
+        "lf-cmvpw7jc30025pe07fox02t6z"
+      ],
+      "history": [
+        {
+          "ts": "2026-10-28T23:01:56.196788+00:00",
+          "batch": "batch1",
+          "change": "created in Batch 1 axial coding from 0246t1"
+        },
+        {
+          "ts": "2026-10-28T23:01:56.196788+00:00",
+          "batch": "batch1",
+          "change": "reviewer decision: kept separate from false_absence_claim (different fix: disclose or page vs. search arguments)"
+        },
+        {
+          "ts": "2026-10-28T23:18:17.389691+00:00",
+          "batch": "batch1",
+          "change": "linked Part A open code(s) lf-cmvpw7jc30025pe07fox02t6z"
+        },
+        {
+          "ts": "2026-10-30T00:21:53.466927+00:00",
+          "batch": "batch3",
+          "change": "close negatives from the list_6_plus search"
+        }
+      ],
+      "merged_into": "order_list_misreported",
+      "retired_at": "2026-10-31T08:34:35.369311+00:00"
+    },
+    {
+      "name": "item_in_results_reported_missing",
+      "status": "merged",
+      "definition": "Fail when the reply says an order the user named (by product, store or order id) is not among the caller's orders, while an order-lookup result in the conversation (list_my_orders, get_order, find_order) contains it.",
+      "boundary": "Catalogue searches (search_products) and help-centre lookups are out of scope: an empty or misdirected catalogue search is false_absence_claim or acts_on_assumed_target. A permission refusal does not deny an item. Showing fewer orders than returned without denying any is partial_list_presented_as_complete.",
+      "requirement": "RESP-3",
+      "evaluator": "code (resolve product ids in the tool result against the named item)",
+      "positive_trace_ids": [
+        "b0e362bb2e81dbbfcdf6317e81b383d5",
+        "5754eb6e8e922d72d010cce923a05dc7",
+        "ba40267183fee238610e773acc7948ed",
+        "61a4ea8d2a40b8eecbc5b98614fdcbb9"
+      ],
+      "close_negative_trace_ids": [
+        "cf8df1eee926569b6c7e5f1fdf9f888b",
+        "25af1826f2375232fd7845c1fbfd9b6d",
+        "48eab4630d98d3e7a7cb5e67a1cb1466",
+        "8afebf2bb36161880b1ca098ce6e5645",
+        "3c82f2f20cde1fba9a991578d8b3916d"
+      ],
+      "part_a_example_trace_ids": [],
+      "created_from": [
+        "amvu65a431035",
+        "amvu6ofq28803",
+        "amvu6rjfc1682",
+        "a-pd-v1-61a4ea8d2a40"
+      ],
+      "history": [
+        {
+          "ts": "2026-10-30T00:21:53.466927+00:00",
+          "batch": "batch3",
+          "change": "created from 0026 and 0037: list_my_orders returns product ids, not titles, and the agent never resolved them; split from false_absence_claim because the fix differs (reviewer decision; brings the count to 9, to settle at freeze)"
+        },
+        {
+          "ts": "2026-10-30T14:51:41.329966+00:00",
+          "batch": "part_d",
+          "change": "Part D search v1: 0142 accepted (Batch 3 trace first marked no failure; rechecked because the mode was created after it was reviewed)"
+        },
+        {
+          "ts": "2026-10-30T16:48:22.741907+00:00",
+          "batch": "part_d",
+          "previous": {
+            "definition": "Fail when the reply says the order or item the user named is not in the caller's records, while a tool result in the conversation contains it (e.g. by product id).",
+            "boundary": "Not a failure when the record is genuinely absent from the tool result and the data. A search with arguments that cannot match the request is false_absence_claim; showing fewer records than returned without denying any is partial_list_presented_as_complete."
+          },
+          "change": "revised after Part D search B: accepting 0125 (a catalogue search) showed \"order or item\" could be read as any catalogue product; scoped to the caller's orders and order-lookup tools (reviewer approved). Rejections 0103, 0116, 0125, 0174, 0250 all fall outside the revised wording."
+        },
+        {
+          "ts": "2026-10-30T17:02:54.378215+00:00",
+          "batch": "part_d",
+          "change": "close negatives: the 5 Part D suggestions the reviewer rejected (0103, 0116, 0125, 0174, 0250), each with its rejection reason"
+        }
+      ],
+      "merged_into": "order_list_misreported",
+      "retired_at": "2026-10-31T08:34:35.369311+00:00"
+    },
+    {
+      "name": "no_retry_after_tool_failure",
+      "status": "merged",
+      "definition": "Fail when the user repeats a request that failed in an earlier turn because of a tool error and the agent declines again without calling the tool.",
+      "boundary": "Not a failure when the agent retries (in the same or later turn) and reports the result honestly. The harness exception itself is never the failure (Option A).",
+      "requirement": "Proposed SPEC addition (no current requirement)",
+      "evaluator": "code (prior-turn tool exception and no tool call in this turn)",
+      "positive_trace_ids": [
+        "0a5a8fca7257572411026c5de20af899",
+        "85e96ba70187ccca83087aa2ca57b001",
+        "e20b867396722cb54a05ddf713a2ca0d",
+        "ac94be268dc8e4b17449a3b4a1fa31e9",
+        "8a7561cd8fa633563573beb30b1f9be6",
+        "201137c3bb2293b424e08034be9bb4a0"
+      ],
+      "close_negative_trace_ids": [
+        "143e7c8fa9cd9304482e8b6d67afe58f",
+        "17991cdeac531a420b4d348e2f0845d1",
+        "43a02bdff5fd14dfd8941fa5a5ad1e89",
+        "cf65374a556cc45023eb71a82fb9f77f"
+      ],
+      "part_a_example_trace_ids": [],
+      "created_from": [
+        "amvsbt5gp5117",
+        "amvsckq7c1124",
+        "amvsovfi48818",
+        "amvsowcfr5967",
+        "amvsoxdvn873",
+        "amvsr3zp33118"
+      ],
+      "history": [
+        {
+          "ts": "2026-10-28T23:01:56.196788+00:00",
+          "batch": "batch1",
+          "change": "created in Batch 1 axial coding from 0050t2, 0054t2, 0054t3, 0080t2, 0084t2"
+        },
+        {
+          "ts": "2026-10-28T23:01:56.196788+00:00",
+          "batch": "batch1",
+          "change": "reviewer decision: kept; propose a SPEC line in the report"
+        },
+        {
+          "ts": "2026-10-29T00:14:28.334868+00:00",
+          "batch": "batch2",
+          "change": "added 0214 t2 (note matches the mode definition)"
+        },
+        {
+          "ts": "2026-10-30T14:21:07.105644+00:00",
+          "batch": "lock-review",
+          "change": "close negatives from the lock review: retried escalate_to_human in a later turn and reported honestly"
+        }
+      ],
+      "merged_into": "tool_failure_recovery_mishandled",
+      "retired_at": "2026-10-31T08:34:35.369311+00:00"
+    },
+    {
+      "name": "support_caller_redirected_to_support",
+      "status": "merged",
+      "definition": "Fail when the caller's role is support and the reply tells them to contact customer support, a support agent, support staff or their support team.",
+      "boundary": "Not a failure when the reply tells the support agent what to pass on to the customer, or offers to retry the escalation. Shopper and merchant callers are out of scope for this mode.",
+      "requirement": "RESP-5 (proposed: role-aware fallback when escalation fails)",
+      "evaluator": "code (caller role) + llm_judge on the reply",
+      "positive_trace_ids": [
+        "17991cdeac531a420b4d348e2f0845d1",
+        "7b4a683d1ac4895d74a446e2fcddc4d4",
+        "57ce52563c93961c9888245a085d7d88",
+        "4e1186aa4d29442b643ddd9cdc66badd"
+      ],
+      "close_negative_trace_ids": [
+        "b71d49811ea37c00354f0ab6e1849a52",
+        "cf65374a556cc45023eb71a82fb9f77f"
+      ],
+      "part_a_example_trace_ids": [],
+      "created_from": [
+        "amvv1feum6169",
+        "amvv1lxck706",
+        "amvv1mvry8443",
+        "amvv1qr8h9667"
+      ],
+      "history": [
+        {
+          "ts": "2026-10-30T14:21:07.105644+00:00",
+          "batch": "lock-review",
+          "change": "created from the lock-handling review (0138, 0139, 0190 t2; 0067 revised for consistency). Brings the count to 10; candidate merge with no_retry_after_tool_failure into one tool-failure recovery mode at freeze."
+        }
+      ],
+      "merged_into": "tool_failure_recovery_mishandled",
+      "retired_at": "2026-10-31T08:34:35.369311+00:00"
+    }
+  ],
+  "agentdebug_comparison": {
+    "source": "https://arxiv.org/abs/2509.25370 (AgentErrorTaxonomy, Table 2)",
+    "ts": "2026-10-30T17:21:20.873681+00:00",
+    "findings": [
+      "Harness lock maps to System: Tool Execution / Environment Error, not the agent's fault; supports Option A.",
+      "item_in_results_reported_missing = Reflection: Outcome Misinterpretation; its split from the search-argument mode matches AgentDebug's Reflection vs Action split.",
+      "Omission / unclear name: Action: Parameter Error. false_absence_claim named a symptom; replaced by search_arguments_misexpress_request (6 positives from the reviewer's notes).",
+      "Watch item, not added: Hallucination (0128 suggested items not in the catalog) has one secondary note only.",
+      "No AgentDebug match: unrequested_eligibility_verdict, support_caller_redirected_to_support (product- and role-specific requirements outside a task-completion taxonomy)."
+    ]
+  },
+  "spec_revisions": [
+    {
+      "ts": "2026-11-01T07:37:57.056183+00:00",
+      "section": "SPEC.md section 7, Tool-use requirements",
+      "id": "TOOLUSE-1",
+      "motivating_annotations": [
+        "amvs5shge7057",
+        "a-pd-R1-c98bae48a576"
+      ],
+      "approved_by": "reviewer"
+    },
+    {
+      "ts": "2026-11-01T07:37:57.056183+00:00",
+      "section": "SPEC.md section 7, Tool-use requirements",
+      "id": "TOOLUSE-2",
+      "motivating_annotations": [
+        "amvsbt5gp5117",
+        "amvsowcfr5967"
+      ],
+      "approved_by": "reviewer"
+    },
+    {
+      "ts": "2026-11-01T07:37:57.056183+00:00",
+      "section": "SPEC.md section 7, Tool-use requirements",
+      "id": "TOOLUSE-3",
+      "motivating_annotations": [
+        "amvv1lxck706"
+      ],
+      "approved_by": "reviewer"
+    },
+    {
+      "ts": "2026-11-01T07:37:57.056183+00:00",
+      "section": "SPEC.md section 7, Tool-use requirements",
+      "id": "TOOLUSE-4",
+      "motivating_annotations": [
+        "amvscj04r9573",
+        "a-pd-v1-61a4ea8d2a40"
+      ],
+      "approved_by": "reviewer"
+    }
+  ],
+  "frozen_at": "2026-11-01T07:37:57.056183+00:00",
+  "known_gaps": [
+    {
+      "ts": "2026-11-01T08:29:17.553556+00:00",
+      "name": "claims_unperformed_action_after_tool_failure",
+      "requirement": "RESP-2",
+      "evidence": [
+        "6c715d27b13a359053d46e9b7d181925"
+      ],
+      "source": "batch4 stability check",
+      "why_not_a_mode": "single occurrence; below the three-positive minimum; taxonomy frozen before Batch 4",
+      "follow_up": "candidate for HW5 synthetic scenarios (tool exception on escalate_to_human, cancel_order, issue_refund)"
+    }
+  ]
+}
