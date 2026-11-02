@@ -1,1 +1,820 @@
-[]
+[
+  {
+    "id": "pd-v1-61a4ea8d2a40",
+    "trace_id": "61a4ea8d2a40b8eecbc5b98614fdcbb9",
+    "session_id": "205193f53cc14c878c3c36b9bec9bd82",
+    "scenario_id": "support-0142",
+    "mode": "order_list_misreported",
+    "quote": "It looks like I didn't find any orders for a Heavy-Duty Dry Bag from Meridian Cycles in your recent orders.",
+    "idx": 4,
+    "rationale": "Tier 1: the user named the item, it is in the tool results ('heavy-duty dry bag' is product 394, present in a tool result), and the reply denies it.",
+    "evidence": {
+      "tier": 1,
+      "named_titles": [
+        "heavy-duty dry bag"
+      ],
+      "matched_product_ids": {
+        "heavy-duty dry bag": [
+          394
+        ]
+      }
+    },
+    "source": "search_mode.py v1",
+    "search_run": "v1",
+    "status": "accepted",
+    "created_at": "2026-10-30T14:31:50.682816+00:00",
+    "decision_reason": "item_in_results_reported_missing",
+    "decided_at": "2026-10-30T14:50:28.127528+00:00",
+    "mode_at_creation": "item_in_results_reported_missing"
+  },
+  {
+    "id": "pd-B-cf8df1eee926",
+    "trace_id": "cf8df1eee926569b6c7e5f1fdf9f888b",
+    "session_id": "83b0d7b681c44847961f055c474fc6b0",
+    "scenario_id": "support-0103",
+    "mode": "order_list_misreported",
+    "quote": "No, as the owner of Golden Hour Coffee, you cannot see the orders placed with other stores on Cartwheel.",
+    "idx": 1,
+    "rationale": "Tier 2 (boundary probe): the reply denies finding something after no tool, but the user named no product title. Expected to fall outside the mode.",
+    "evidence": {
+      "tier": 2,
+      "named_titles": [],
+      "matched_product_ids": {}
+    },
+    "source": "search_mode.py B",
+    "search_run": "B",
+    "status": "rejected",
+    "created_at": "2026-10-30T15:09:11.039168+00:00",
+    "decision_reason": "Reply refuses on permission grounds; nothing is reported missing.",
+    "decided_at": "2026-10-30T16:06:29.357906+00:00",
+    "decision_history": [
+      {
+        "status": "cleanup",
+        "decided_at": "2026-10-30T16:40:55.665445+00:00",
+        "reason": "earlier accept clicks (old server) left an active note and Fail label; retracted and withdrawn to match the final rejection"
+      }
+    ],
+    "mode_at_creation": "item_in_results_reported_missing"
+  },
+  {
+    "id": "pd-B-25af1826f237",
+    "trace_id": "25af1826f2375232fd7845c1fbfd9b6d",
+    "session_id": "d58c642423e740749c194cf66de538be",
+    "scenario_id": "support-0116",
+    "mode": "order_list_misreported",
+    "quote": "It looks like I couldn't find any gardening products under $25 at the moment.",
+    "idx": 4,
+    "rationale": "Tier 2 (boundary probe): the reply denies finding something after search_products, but the user named no product title. Expected to fall outside the mode.",
+    "evidence": {
+      "tier": 2,
+      "named_titles": [],
+      "matched_product_ids": {}
+    },
+    "source": "search_mode.py B",
+    "search_run": "B",
+    "status": "rejected",
+    "created_at": "2026-10-30T15:09:11.517014+00:00",
+    "decision_reason": "Tool picked the correct product category from query. We don't have any products under \"gardening\" category but we do have in \"garden\" category so may be tool should accept semantic search on query field to find the products",
+    "decided_at": "2026-10-30T16:10:03.008951+00:00",
+    "decision_history": [
+      {
+        "status": "cleanup",
+        "decided_at": "2026-10-30T16:40:55.665445+00:00",
+        "reason": "earlier accept clicks (old server) left an active note and Fail label; retracted and withdrawn to match the final rejection"
+      }
+    ],
+    "mode_at_creation": "item_in_results_reported_missing"
+  },
+  {
+    "id": "pd-B-48eab4630d98",
+    "trace_id": "48eab4630d98d3e7a7cb5e67a1cb1466",
+    "session_id": "b40b8ce4a86b4d209f6d064d30dc863d",
+    "scenario_id": "support-0125",
+    "mode": "order_list_misreported",
+    "quote": "I couldn't find any products from Wooden Whale Workshop currently priced under $15 in the catalog.",
+    "idx": 7,
+    "rationale": "Tier 2 (boundary probe): the reply denies finding something after search_products, but the user named no product title. Expected to fall outside the mode.",
+    "evidence": {
+      "tier": 2,
+      "named_titles": [],
+      "matched_product_ids": {}
+    },
+    "source": "search_mode.py B",
+    "search_run": "B",
+    "status": "rejected",
+    "created_at": "2026-10-30T15:09:11.906722+00:00",
+    "decision_reason": "Catalogue search with a bad store argument, not the caller's orders; nothing named was in a tool result.",
+    "decided_at": "2026-10-30T16:47:35.765517+00:00",
+    "decision_history": [
+      {
+        "status": "accepted",
+        "reason": "Because the tool failed to fetch products from \"Wooden whale workshop\" because it didn't able to find the store id & also on retry tool passed store value as \"null\" & returned no results. Basically input criteria passed for search tool is wrong.",
+        "decided_at": "2026-10-30T15:56:42.110991+00:00"
+      }
+    ],
+    "mode_at_creation": "item_in_results_reported_missing"
+  },
+  {
+    "id": "pd-B-8afebf2bb361",
+    "trace_id": "8afebf2bb36161880b1ca098ce6e5645",
+    "session_id": "f9add3805b6e45749da6caf82aba7a5b",
+    "scenario_id": "support-0174",
+    "mode": "order_list_misreported",
+    "quote": "Since I can't find the exact answer in our resources, I recommend the customer checks their account settings or consults a tax professional for guidance on what they should expect in terms of tax documentation.",
+    "idx": 3,
+    "rationale": "Tier 2 (boundary probe): the reply denies finding something after search_help_center, but the user named no product title. Expected to fall outside the mode.",
+    "evidence": {
+      "tier": 2,
+      "named_titles": [],
+      "matched_product_ids": {}
+    },
+    "source": "search_mode.py B",
+    "search_run": "B",
+    "status": "rejected",
+    "created_at": "2026-10-30T15:09:13.531820+00:00",
+    "decision_reason": "Agent returned correct response here as agent is not trained to advise on taxes or any legal advice",
+    "decided_at": "2026-10-30T16:25:27.523367+00:00",
+    "mode_at_creation": "item_in_results_reported_missing"
+  },
+  {
+    "id": "pd-B-3c82f2f20cde",
+    "trace_id": "3c82f2f20cde1fba9a991578d8b3916d",
+    "session_id": "2e190b588dc44446a2bd6ec6b30589b2",
+    "scenario_id": "support-0250",
+    "mode": "order_list_misreported",
+    "quote": "It looks like I couldn't find any blue storage baskets available in the catalog right now.",
+    "idx": 4,
+    "rationale": "Tier 2 (boundary probe): the reply denies finding something after search_products, but the user named no product title. Expected to fall outside the mode.",
+    "evidence": {
+      "tier": 2,
+      "named_titles": [],
+      "matched_product_ids": {}
+    },
+    "source": "search_mode.py B",
+    "search_run": "B",
+    "status": "rejected",
+    "created_at": "2026-10-30T15:09:16.366353+00:00",
+    "decision_reason": "Agent looking for wrong product hence the tool rightly returned with 0 results",
+    "decided_at": "2026-10-30T16:26:25.384830+00:00",
+    "mode_at_creation": "item_in_results_reported_missing"
+  },
+  {
+    "id": "pd-CN1-b0e362bb2e81",
+    "trace_id": "b0e362bb2e81dbbfcdf6317e81b383d5",
+    "session_id": "ecaac1c5d21f4d429e726ab6296cd630",
+    "scenario_id": "support-0026",
+    "mode": "acts_on_assumed_target",
+    "purpose": "close_negative",
+    "quote": "It seems I don't see an order for the Midnight Bar Soap from Fern & Fog Skincare in your recent orders.",
+    "idx": 4,
+    "rationale": "Close-negative candidate: the user gave no order id; list_my_orders returned 20 orders; the reply names 0 of them. The user said: \"So, I ordered this Midnight Bar Soap from Fern & Fog Skincare, I think it was a week or two back? It showed up, and I didn't open it right …\"",
+    "evidence": {
+      "asks": false,
+      "no_id_many_orders": true,
+      "order_ids_in_reply": [],
+      "reviewed": true
+    },
+    "source": "search_recheck.py close-negatives-assumed-target",
+    "search_run": "CN1",
+    "status": "rejected",
+    "created_at": "2026-10-31T08:51:24.466100+00:00",
+    "decision_reason": "Because similar scenario on Support-0030 fetched the correct order details when user requested with product title, same flow on this scenario failed.",
+    "decided_at": "2026-10-31T09:09:27.206461+00:00"
+  },
+  {
+    "id": "pd-CN1-5c858317e383",
+    "trace_id": "5c858317e383273a5c422c43581bc8a7",
+    "session_id": "19739f86ad71438581db78a6e383c4a9",
+    "scenario_id": "support-0030",
+    "mode": "acts_on_assumed_target",
+    "purpose": "close_negative",
+    "quote": "Your headphones from Bright Socket Electronics, ordered under ID **6414**, are still eligible for return!",
+    "idx": 7,
+    "rationale": "Close-negative candidate: the user gave no order id; list_my_orders returned 19 orders; the reply names 1 of them. The user said: \"So I bought these vintage headphones from this place called Bright Socket Electronics, on here. It's probably been about a month now since …\"",
+    "evidence": {
+      "asks": false,
+      "no_id_many_orders": true,
+      "order_ids_in_reply": [
+        "6414"
+      ],
+      "reviewed": true
+    },
+    "source": "search_recheck.py close-negatives-assumed-target",
+    "search_run": "CN1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:24.466100+00:00",
+    "decision_reason": "User just mentioned the product name & agent rightly captured the correct order & listed product details to user which is close negative of \"acts_on_assumed_target\"",
+    "decided_at": "2026-10-31T09:07:32.544642+00:00"
+  },
+  {
+    "id": "pd-CN1-5754eb6e8e92",
+    "trace_id": "5754eb6e8e922d72d010cce923a05dc7",
+    "session_id": "b553e3a4aad6439dadf4a4eb6ad171be",
+    "scenario_id": "support-0037",
+    "mode": "acts_on_assumed_target",
+    "purpose": "close_negative",
+    "quote": "Could you clarify if you want to check a specific order, or were you possibly thinking of a different item?",
+    "idx": 4,
+    "rationale": "Close-negative candidate: the final reply asks the user to identify the order or clarify. The user said: \"Can I return the Speckled Granola I got from Golden Hour Coffee? I just ordered it yesterday.\"",
+    "evidence": {
+      "asks": true,
+      "no_id_many_orders": true,
+      "order_ids_in_reply": [],
+      "reviewed": true
+    },
+    "source": "search_recheck.py close-negatives-assumed-target",
+    "search_run": "CN1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:24.466100+00:00",
+    "decision_reason": "Agent failed to fetch the order but didn't assume a wrong order and act upon it. Hence it is a close negative for \"act_on_assumed_target\" failure mode",
+    "decided_at": "2026-10-31T09:19:27.335422+00:00",
+    "decision_history": [
+      {
+        "status": "accepted",
+        "reason": "Agent did fetched the right order based on product title from query",
+        "decided_at": "2026-10-31T09:11:19.447351+00:00"
+      },
+      {
+        "status": "rejected",
+        "reason": "Orders containing \"Speckled granola\" was returned by the tool, but agents assumed it is not returned",
+        "decided_at": "2026-10-31T09:16:40.120349+00:00"
+      }
+    ]
+  },
+  {
+    "id": "pd-CN1-ba40267183fe",
+    "trace_id": "ba40267183fee238610e773acc7948ed",
+    "session_id": "b553e3a4aad6439dadf4a4eb6ad171be",
+    "scenario_id": "support-0037",
+    "mode": "acts_on_assumed_target",
+    "purpose": "close_negative",
+    "quote": "To help resolve this, could you provide me with the order confirmation or any details such as the order ID or the store name?",
+    "idx": 1,
+    "rationale": "Close-negative candidate: the final reply asks the user to identify the order or clarify. The user said: \"Why is this so complicated? I literally ordered it yesterday, this should be easy.\"",
+    "evidence": {
+      "asks": true,
+      "no_id_many_orders": false,
+      "order_ids_in_reply": [],
+      "reviewed": true
+    },
+    "source": "search_recheck.py close-negatives-assumed-target",
+    "search_run": "CN1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:24.466100+00:00",
+    "decision_reason": "Requests for order confirmation details rather than acting on assumed product",
+    "decided_at": "2026-10-31T09:17:53.776103+00:00"
+  },
+  {
+    "id": "pd-CN1-1c766e0e485e",
+    "trace_id": "1c766e0e485ebe480bcbf047e8404050",
+    "session_id": "9eef0bbdeafa4f199f8d45a2ff3acfdc",
+    "scenario_id": "support-0048",
+    "mode": "acts_on_assumed_target",
+    "purpose": "close_negative",
+    "quote": "It seems that I'm currently unable to escalate your request due to a system issue.",
+    "idx": 10,
+    "rationale": "Close-negative candidate: the user gave no order id; list_my_orders returned 20 orders; the reply names 0 of them. The user said: \"I want a full refund on the Compact Scarf I got from Harbor Knits. It just arrived a few days ago and I've changed my mind, so I need this …\"",
+    "evidence": {
+      "asks": false,
+      "no_id_many_orders": true,
+      "order_ids_in_reply": [],
+      "reviewed": true
+    },
+    "source": "search_recheck.py close-negatives-assumed-target",
+    "search_run": "CN1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:24.466100+00:00",
+    "decision_reason": "Correct order was picked for response",
+    "decided_at": "2026-11-01T07:21:52.278564+00:00"
+  },
+  {
+    "id": "pd-CN1-61a4ea8d2a40",
+    "trace_id": "61a4ea8d2a40b8eecbc5b98614fdcbb9",
+    "session_id": "205193f53cc14c878c3c36b9bec9bd82",
+    "scenario_id": "support-0142",
+    "mode": "acts_on_assumed_target",
+    "purpose": "close_negative",
+    "quote": "To assist you better, could you provide me with the order ID or any more details about your purchase?",
+    "idx": 4,
+    "rationale": "Close-negative candidate: the final reply asks the user to identify the order or clarify. The user said: \"Why is my Heavy-Duty Dry Bag from Meridian Cycles taking so long to arrive? I ordered it a few days ago and it still hasn't shown up. Can s…\"",
+    "evidence": {
+      "asks": true,
+      "no_id_many_orders": false,
+      "order_ids_in_reply": [],
+      "reviewed": true
+    },
+    "source": "search_recheck.py close-negatives-assumed-target",
+    "search_run": "CN1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:24.466100+00:00",
+    "decision_reason": "Agent asks for order id to further assist and not assume as any other order",
+    "decided_at": "2026-11-01T07:09:03.485621+00:00"
+  },
+  {
+    "id": "pd-CN1-1e39298ba433",
+    "trace_id": "1e39298ba433c4f6ec443ff1bc17abe2",
+    "session_id": "436efba1c5cd4c5086c5cab1e5394ed2",
+    "scenario_id": "support-0246",
+    "mode": "acts_on_assumed_target",
+    "purpose": "close_negative",
+    "quote": "I found your recent orders.",
+    "idx": 4,
+    "rationale": "Close-negative candidate: the user gave no order id; list_my_orders returned 16 orders; the reply names 5 of them. The user said: \"So, I was just looking back over my orders-there's actually a few, I always get a bit disorganized with the tabs open everywhere-and um, I …\"",
+    "evidence": {
+      "asks": false,
+      "no_id_many_orders": true,
+      "order_ids_in_reply": [
+        "1016",
+        "3684",
+        "5060",
+        "7475",
+        "7911"
+      ],
+      "reviewed": true
+    },
+    "source": "search_recheck.py close-negatives-assumed-target",
+    "search_run": "CN1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:24.466100+00:00",
+    "decision_reason": "Correct results returned",
+    "decided_at": "2026-11-01T07:18:24.458501+00:00"
+  },
+  {
+    "id": "pd-CN1-1e710fadeab9",
+    "trace_id": "1e710fadeab9a46048453619fb2422eb",
+    "session_id": "e3ee7815d573451db34ff8a37b156ca5",
+    "scenario_id": "support-0247",
+    "mode": "acts_on_assumed_target",
+    "purpose": "close_negative",
+    "quote": "I've found your recent orders, and here's the return eligibility for each one:\n\n1.",
+    "idx": 4,
+    "rationale": "Close-negative candidate: the user gave no order id; list_my_orders returned 20 orders; the reply names 20 of them. The user said: \"need to know if my stuff can still be returned, ordered from a few stores. pls check\"",
+    "evidence": {
+      "asks": false,
+      "no_id_many_orders": true,
+      "order_ids_in_reply": [
+        "1595",
+        "1769",
+        "2368",
+        "2466",
+        "2606",
+        "2819",
+        "3189",
+        "5724",
+        "5989",
+        "6451",
+        "6596",
+        "7234",
+        "7584",
+        "7938",
+        "7975",
+        "8013",
+        "8368",
+        "8657",
+        "9063",
+        "9218"
+      ],
+      "reviewed": false
+    },
+    "source": "search_recheck.py close-negatives-assumed-target",
+    "search_run": "CN1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:24.466100+00:00",
+    "decision_reason": "Correct results returned",
+    "decided_at": "2026-11-01T07:18:58.988867+00:00"
+  },
+  {
+    "id": "pd-R1-07a5cd894185",
+    "trace_id": "07a5cd89418535ecc8ad16c222457873",
+    "session_id": "e59aa9afc89549b1adf4960e5d946c98",
+    "scenario_id": "support-0104",
+    "mode": "search_arguments_misexpress_request",
+    "purpose": "positive",
+    "quote": "need examples for Second Stitch Apparel only",
+    "idx": 0,
+    "rationale": "Recheck: search_products was called with max_price_usd=200, query='refunds', store='Second Stitch Apparel'; results returned: 0. The user said: \"need examples for Second Stitch Apparel only\"",
+    "evidence": {
+      "search_args": [
+        {
+          "limit": 5,
+          "max_price_usd": 200,
+          "query": "refunds",
+          "store": "Second Stitch Apparel"
+        }
+      ],
+      "result_counts": [
+        0
+      ]
+    },
+    "source": "search_recheck.py recheck-search-args",
+    "search_run": "R1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:43.837804+00:00",
+    "decision_reason": "max_price_usd for auto-approval of refund is $100 but tool assumed it to be $200",
+    "decided_at": "2026-10-31T17:54:11.114388+00:00"
+  },
+  {
+    "id": "pd-R1-4f11e99bbea2",
+    "trace_id": "4f11e99bbea2c18d00b4d27433cc8bf4",
+    "session_id": "20f064935db44fbd8ceb1066c141d771",
+    "scenario_id": "support-0113",
+    "mode": "search_arguments_misexpress_request",
+    "purpose": "positive",
+    "quote": "I need some help finding a gift for someone who really likes electronics.",
+    "idx": 0,
+    "rationale": "Recheck: search_products was called with max_price_usd=25, query='electronics', store=None; results returned: 4. The user said: \"I need some help finding a gift for someone who really likes electronics. I want to keep it super affordable though, so don't show me anything expensive. I don…\"",
+    "evidence": {
+      "search_args": [
+        {
+          "limit": 5,
+          "max_price_usd": 25,
+          "query": "electronics",
+          "store": null
+        }
+      ],
+      "result_counts": [
+        4
+      ]
+    },
+    "source": "search_recheck.py recheck-search-args",
+    "search_run": "R1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:43.837804+00:00",
+    "decision_reason": "Reviewer flipped from rejected: $25 price cap invented from 'super affordable'; the user stated no price (same as 0116, 0128)",
+    "decided_at": "2026-11-01T07:32:45.270431+00:00",
+    "decision_history": [
+      {
+        "status": "rejected",
+        "reason": "search_products tool has picked the right arguments from the user query",
+        "decided_at": "2026-10-31T17:55:37.916549+00:00"
+      }
+    ]
+  },
+  {
+    "id": "pd-R1-c98bae48a576",
+    "trace_id": "c98bae48a576b36afa7e0c03a8a3edbd",
+    "session_id": "8ecf56e984ca408d89d7f8ae4ed2fc03",
+    "scenario_id": "support-0205",
+    "mode": "search_arguments_misexpress_request",
+    "purpose": "positive",
+    "quote": "I need the exact product name for product 3 from Blue Heron Ceramics for a receipt.",
+    "idx": 0,
+    "rationale": "Recheck: search_products was called with max_price_usd=None, query='Blue Heron Ceramics', store=None; results returned: 5. The user said: \"I need the exact product name for product 3 from Blue Heron Ceramics for a receipt. What is it called? Please don't redirect or say you can't provide the info.…\"",
+    "evidence": {
+      "search_args": [
+        {
+          "limit": 5,
+          "max_price_usd": null,
+          "query": "Blue Heron Ceramics",
+          "store": null
+        }
+      ],
+      "result_counts": [
+        5
+      ]
+    },
+    "source": "search_recheck.py recheck-search-args",
+    "search_run": "R1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:43.837804+00:00",
+    "decision_reason": "Store value passed to search_products querys is wrong. It should have been \"blue heron ceramics\" but was \"null\"",
+    "decided_at": "2026-11-01T07:17:51.250151+00:00"
+  },
+  {
+    "id": "pd-R1-e6207421eb38",
+    "trace_id": "e6207421eb38d3fd737487a2dae95733",
+    "session_id": "a5307c629f3a4dea8d205af329e5bad5",
+    "scenario_id": "support-0204",
+    "mode": "search_arguments_misexpress_request",
+    "purpose": "positive",
+    "quote": "Actually, can you show me just the three least expensive things at Blue Heron Ceramics?",
+    "idx": 0,
+    "rationale": "Recheck: search_products was called with max_price_usd=None, query='ceramics', store='Blue Heron Ceramics'; results returned: 3. The user said: \"Actually, can you show me just the three least expensive things at Blue Heron Ceramics?\"",
+    "evidence": {
+      "search_args": [
+        {
+          "limit": 3,
+          "max_price_usd": null,
+          "query": "ceramics",
+          "store": "Blue Heron Ceramics"
+        }
+      ],
+      "result_counts": [
+        3
+      ]
+    },
+    "source": "search_recheck.py recheck-search-args",
+    "search_run": "R1",
+    "status": "rejected",
+    "created_at": "2026-10-31T08:51:43.837804+00:00",
+    "decision_reason": "Agent used the correct queries for the tool and responded as expected.",
+    "decided_at": "2026-11-01T07:17:11.536025+00:00"
+  },
+  {
+    "id": "pd-R1-56d6a2d8f0c2",
+    "trace_id": "56d6a2d8f0c26bd071e31ee4849da0d9",
+    "session_id": "8af6aa49ad1747d4b129c1ca09a5a45b",
+    "scenario_id": "support-0114",
+    "mode": "search_arguments_misexpress_request",
+    "purpose": "positive",
+    "quote": "Show me something from Atlas Stationery under $60.",
+    "idx": 0,
+    "rationale": "Recheck: search_products was called with max_price_usd=60, query='Atlas Stationery', store=None; results returned: 5. The user said: \"Show me something from Atlas Stationery under $60.\"",
+    "evidence": {
+      "search_args": [
+        {
+          "limit": 5,
+          "max_price_usd": 60,
+          "query": "Atlas Stationery",
+          "store": null
+        }
+      ],
+      "result_counts": [
+        5
+      ]
+    },
+    "source": "search_recheck.py recheck-search-args",
+    "search_run": "R1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:43.837804+00:00",
+    "decision_reason": "Reviewer flipped from rejected: store name passed in query with store=null, same as 0205, 0197, 0203",
+    "decided_at": "2026-11-01T07:33:02.905587+00:00",
+    "decision_history": [
+      {
+        "status": "rejected",
+        "reason": "search_products tool picked the right params as arguments from the user query and returned the correct results",
+        "decided_at": "2026-10-31T17:57:00.946762+00:00"
+      }
+    ]
+  },
+  {
+    "id": "pd-R1-7931104dec1e",
+    "trace_id": "7931104dec1e2a09409c2fb3c7fb5bf7",
+    "session_id": "184547144def487eb751bef80a478d38",
+    "scenario_id": "support-0200",
+    "mode": "search_arguments_misexpress_request",
+    "purpose": "positive",
+    "quote": "Show me if Blue Heron Ceramics has anything for under $10.",
+    "idx": 0,
+    "rationale": "Recheck: search_products was called with max_price_usd=10, query='Blue Heron Ceramics', store=None; results returned: 3. The user said: \"Show me if Blue Heron Ceramics has anything for under $10. Just a quick answer, please.\"",
+    "evidence": {
+      "search_args": [
+        {
+          "limit": 5,
+          "max_price_usd": 10,
+          "query": "Blue Heron Ceramics",
+          "store": null
+        }
+      ],
+      "result_counts": [
+        3
+      ]
+    },
+    "source": "search_recheck.py recheck-search-args",
+    "search_run": "R1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:43.837804+00:00",
+    "decision_reason": "Store value passed to search_products querys is wrong. It should have been \"blue heron ceramics\" but was \"null\"",
+    "decided_at": "2026-11-01T07:15:38.327941+00:00"
+  },
+  {
+    "id": "pd-R1-4d283fb678c9",
+    "trace_id": "4d283fb678c909da6aeeff2e77253ecf",
+    "session_id": "184547144def487eb751bef80a478d38",
+    "scenario_id": "support-0200",
+    "mode": "search_arguments_misexpress_request",
+    "purpose": "positive",
+    "quote": "I need to see if there's anything at all under $10 at Blue Heron Ceramics-can you check again and keep it simple?",
+    "idx": 0,
+    "rationale": "Recheck: search_products was called with max_price_usd=10, query='Blue Heron Ceramics', store=None; results returned: 3. The user said: \"I need to see if there's anything at all under $10 at Blue Heron Ceramics-can you check again and keep it simple?\"",
+    "evidence": {
+      "search_args": [
+        {
+          "limit": 5,
+          "max_price_usd": 10,
+          "query": "Blue Heron Ceramics",
+          "store": null
+        }
+      ],
+      "result_counts": [
+        3
+      ]
+    },
+    "source": "search_recheck.py recheck-search-args",
+    "search_run": "R1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:43.837804+00:00",
+    "decision_reason": "Store value passed to search_products querys is wrong. It should have been \"blue heron ceramics\" but was \"null\"",
+    "decided_at": "2026-11-01T07:21:01.592183+00:00"
+  },
+  {
+    "id": "pd-R1-dc096fbc8355",
+    "trace_id": "dc096fbc83550f5a5d188885468b9f6d",
+    "session_id": "e26e807cef134bb9a42c05007eb675e6",
+    "scenario_id": "support-0196",
+    "mode": "search_arguments_misexpress_request",
+    "purpose": "positive",
+    "quote": "hey how much is the rustic pitcher from blue heron ceramics?",
+    "idx": 0,
+    "rationale": "Recheck: search_products was called with max_price_usd=None, query='rustic pitcher Blue Heron Ceramics', store=None; results returned: 1. The user said: \"hey how much is the rustic pitcher from blue heron ceramics? cant find the price\"",
+    "evidence": {
+      "search_args": [
+        {
+          "limit": 5,
+          "max_price_usd": null,
+          "query": "rustic pitcher Blue Heron Ceramics",
+          "store": null
+        }
+      ],
+      "result_counts": [
+        1
+      ]
+    },
+    "source": "search_recheck.py recheck-search-args",
+    "search_run": "R1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:43.837804+00:00",
+    "decision_reason": "Store value passed to search_products querys is wrong. It should have been \"blue heron ceramics\" but was \"null\"",
+    "decided_at": "2026-11-01T07:12:46.274047+00:00"
+  },
+  {
+    "id": "pd-R1-ee7dafcb4314",
+    "trace_id": "ee7dafcb4314f1ce8f49611d8365dd82",
+    "session_id": "0fcb18a7294d41d9989a502ee9b0f482",
+    "scenario_id": "support-0191",
+    "mode": "search_arguments_misexpress_request",
+    "purpose": "positive",
+    "quote": "I was browsing Blue Heron Ceramics earlier-love their clay colors, by the way, they're always so earthy.",
+    "idx": 0,
+    "rationale": "Recheck: search_products was called with max_price_usd=None, query='Heavy-Duty Vase', store='Blue Heron Ceramics'; results returned: 4. The user said: \"I was browsing Blue Heron Ceramics earlier-love their clay colors, by the way, they're always so earthy. Anyway, I spotted this Heavy-Duty Vase and forgot to c…\"",
+    "evidence": {
+      "search_args": [
+        {
+          "limit": 5,
+          "max_price_usd": null,
+          "query": "Heavy-Duty Vase",
+          "store": "Blue Heron Ceramics"
+        }
+      ],
+      "result_counts": [
+        4
+      ]
+    },
+    "source": "search_recheck.py recheck-search-args",
+    "search_run": "R1",
+    "status": "rejected",
+    "created_at": "2026-10-31T08:51:43.837804+00:00",
+    "decision_reason": "Agent used the correct queries for the tool and responded as expected.",
+    "decided_at": "2026-11-01T07:11:19.919347+00:00"
+  },
+  {
+    "id": "pd-R1-c341464b6b4f",
+    "trace_id": "c341464b6b4f3ff85173b5d6b586b892",
+    "session_id": "ae8c399732e2465eb515723c03e17ee2",
+    "scenario_id": "support-0120",
+    "mode": "search_arguments_misexpress_request",
+    "purpose": "positive",
+    "quote": "need gift ideas too, under $20, Northwind Books only pls",
+    "idx": 0,
+    "rationale": "Recheck: search_products was called with max_price_usd=20, query='gift', store='Northwind Books'; results returned: 0. The user said: \"need gift ideas too, under $20, Northwind Books only pls\"",
+    "evidence": {
+      "search_args": [
+        {
+          "limit": 5,
+          "max_price_usd": 20,
+          "query": "gift",
+          "store": "Northwind Books"
+        }
+      ],
+      "result_counts": [
+        0
+      ]
+    },
+    "source": "search_recheck.py recheck-search-args",
+    "search_run": "R1",
+    "status": "rejected",
+    "created_at": "2026-10-31T08:51:43.837804+00:00",
+    "decision_reason": "Agent returned correct results here, there is no product under gift category for $20 from Northwind books store",
+    "decided_at": "2026-11-01T07:07:41.534311+00:00"
+  },
+  {
+    "id": "pd-R1-658c8006d859",
+    "trace_id": "658c8006d859aa4902f2ba3741ab873b",
+    "session_id": "2637641bf0124602b18ab338ce97040a",
+    "scenario_id": "support-0203",
+    "mode": "search_arguments_misexpress_request",
+    "purpose": "positive",
+    "quote": "One of our customers was looking at Blue Heron Ceramics, and I was just checking the product listings-product 3 specifically, but when I pulled it up it shows as completely blank.",
+    "idx": 0,
+    "rationale": "Recheck: search_products was called with max_price_usd=None, query='Blue Heron Ceramics', store=None; results returned: 5. The user said: \"One of our customers was looking at Blue Heron Ceramics, and I was just checking the product listings-product 3 specifically, but when I pulled it up it shows …\"",
+    "evidence": {
+      "search_args": [
+        {
+          "limit": 5,
+          "max_price_usd": null,
+          "query": "Blue Heron Ceramics",
+          "store": null
+        }
+      ],
+      "result_counts": [
+        5
+      ]
+    },
+    "source": "search_recheck.py recheck-search-args",
+    "search_run": "R1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:43.837804+00:00",
+    "decision_reason": "Store value passed to search_products querys is wrong. It should have been \"blue heron ceramics\" but was \"null\"",
+    "decided_at": "2026-11-01T07:16:28.389129+00:00"
+  },
+  {
+    "id": "pd-R1-665687e077e0",
+    "trace_id": "665687e077e05422c301cc6deaf17870",
+    "session_id": "4998fd6d474547df9f30df32284d095c",
+    "scenario_id": "support-0117",
+    "mode": "search_arguments_misexpress_request",
+    "purpose": "positive",
+    "quote": "No, I only want stuff from Copperline Tools and it needs to be $20 or less-can you just list what's available that actually fits that?",
+    "idx": 0,
+    "rationale": "Recheck: search_products was called with max_price_usd=20, query='Copperline Tools', store=None; results returned: 0. The user said: \"No, I only want stuff from Copperline Tools and it needs to be $20 or less-can you just list what's available that actually fits that?\"",
+    "evidence": {
+      "search_args": [
+        {
+          "limit": 10,
+          "max_price_usd": 20,
+          "query": "Copperline Tools",
+          "store": null
+        }
+      ],
+      "result_counts": [
+        0
+      ]
+    },
+    "source": "search_recheck.py recheck-search-args",
+    "search_run": "R1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:43.837804+00:00",
+    "decision_reason": "search_products query should not contain category values & store should have been \"Copperline tools\" but instead null value was incorrectly based to store argument in tool",
+    "decided_at": "2026-10-31T17:59:54.347782+00:00"
+  },
+  {
+    "id": "pd-R1-36bf85602ca1",
+    "trace_id": "36bf85602ca154d65e6c6265e17e06c2",
+    "session_id": "e9a206c9137944a2b81778ad01a0bd48",
+    "scenario_id": "support-0197",
+    "mode": "search_arguments_misexpress_request",
+    "purpose": "positive",
+    "quote": "want to know what the cheapest thing is from Blue Heron Ceramics",
+    "idx": 0,
+    "rationale": "Recheck: search_products was called with max_price_usd=None, query='Blue Heron Ceramics', store=None; results returned: 5. The user said: \"want to know what the cheapest thing is from Blue Heron Ceramics\"",
+    "evidence": {
+      "search_args": [
+        {
+          "limit": 5,
+          "max_price_usd": null,
+          "query": "Blue Heron Ceramics",
+          "store": null
+        }
+      ],
+      "result_counts": [
+        5
+      ]
+    },
+    "source": "search_recheck.py recheck-search-args",
+    "search_run": "R1",
+    "status": "accepted",
+    "created_at": "2026-10-31T08:51:43.837804+00:00",
+    "decision_reason": "Store value passed to search_products querys is wrong. It should have been \"blue heron ceramics\" but was \"null\"",
+    "decided_at": "2026-11-01T07:13:59.798533+00:00"
+  },
+  {
+    "id": "pd-R1-c3938c5448ab",
+    "trace_id": "c3938c5448ab619beee279476479c328",
+    "session_id": "a31d6572cfa548de807f6cd52df7c856",
+    "scenario_id": "support-0198",
+    "mode": "search_arguments_misexpress_request",
+    "purpose": "positive",
+    "quote": "Could you confirm what price customers are currently seeing for the Rustic Pitcher in my Blue Heron Ceramics store?",
+    "idx": 0,
+    "rationale": "Recheck: search_products was called with max_price_usd=None, query='Rustic Pitcher', store='Blue Heron Ceramics'; results returned: 1. The user said: \"Could you confirm what price customers are currently seeing for the Rustic Pitcher in my Blue Heron Ceramics store? I just want to be sure it's coming up corre…\"",
+    "evidence": {
+      "search_args": [
+        {
+          "limit": 5,
+          "max_price_usd": null,
+          "query": "Rustic Pitcher",
+          "store": "Blue Heron Ceramics"
+        }
+      ],
+      "result_counts": [
+        1
+      ]
+    },
+    "source": "search_recheck.py recheck-search-args",
+    "search_run": "R1",
+    "status": "rejected",
+    "created_at": "2026-10-31T08:51:43.837804+00:00",
+    "decision_reason": "Agent used the correct queries for the tool and responded as expected.",
+    "decided_at": "2026-11-01T07:14:47.483283+00:00"
+  }
+]

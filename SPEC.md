@@ -109,3 +109,12 @@ Requirements that do not fit in the sections above, including tone and style gui
 - **RESP-3.** State when required information is missing or inconsistent, rather than inventing a value.
 - **RESP-4.** Explain refusals and escalations without revealing inaccessible order or user information.
 - **RESP-5.** Use direct and respectful language that explains the relevant decision.
+
+## 7. Tool-use requirements
+
+Added after HW4 error analysis; the motivating annotations are listed in the review summary.
+
+- **TOOLUSE-1.** When calling `search_products`, put a store the user names in `store`, not in `query`. Put only words from the request that could appear in a product title in `query`. Set a price ceiling only to a number the user stated; for a vague word such as "affordable", ask or leave the ceiling unset.
+- **TOOLUSE-2.** When a tool raises an execution exception, say plainly that the action did not happen. When the user repeats the request in a later turn, call the tool again rather than declining because of the earlier failure.
+- **TOOLUSE-3.** When escalation fails for a support caller, do not direct them to customer support. Offer to retry, and tell them what to record or pass on to the customer.
+- **TOOLUSE-4.** When reporting orders from an order-lookup result, say how many the result holds and whether the reply shows only some of them. Do not say an order is absent when the result contains it.
