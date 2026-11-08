@@ -1,0 +1,46 @@
+{
+  "mode": "policy_answer_missing_specifics",
+  "status": "boundary set by the reviewer on 2026-11-03 (re-judge of 12 traces); frozen before the first prompt run",
+  "adopted_at": "2026-11-02",
+  "label_convention": "1 = Pass (failure absent), 0 = Fail (failure present)",
+  "change_from_hw4": "Narrowed. HW4 also failed a reply that omitted the policy identifier; that check moves to code (a regex for cw-* and store-*-policy ids). Narrowing only removes a Fail condition, so every HW4 Pass label stays Pass.",
+  "question": "Does the final reply to a policy-governed question state the deciding value that the tool result or policy supplied, and state it correctly?",
+  "applies_when": "The user asks something a policy decides (whether a return or refund is possible, a return window or cutoff, a refund timeline, a dispute window, escalation timing, which refunds need approval), or the reply grants or refuses a return or refund on policy grounds.",
+  "fail": [
+    "The reply gives a policy outcome (eligible, not eligible, expired, non-refundable) without the deciding value the tool or policy supplied: window length, days elapsed or remaining, cutoff date, threshold, or SLA.",
+    "The reply gives a vague or generic value ('a few days', 'a specific timeframe', 'a few hours to a couple of days') where the policy states one, including when the agent offers to look the policy up instead of answering.",
+    "The reply states a value that contradicts the tool result or the applicable policy, for example the platform default when a store override applies.",
+    "A refund request is blocked by a tool error, and the reply does not state the refund amount established from the order record before explaining that the refund cannot be processed now. For a refund request the amount is a deciding value. The amount counts only when the refund was blocked; for an eligibility answer, a delivery date or order total alone is not the deciding value."
+  ],
+  "pass": [
+    "The reply states the deciding value from the tool or policy correctly, even briefly, with or without a policy id.",
+    "The data needed for the deciding value is missing or inconsistent (e.g. no delivery date), and the reply gives the applicable window and says what is missing, so the exact cutoff cannot be computed (RESP-3).",
+    "The reply answers what was asked with the correct value and leaves out other policy conditions the user did not ask about.",
+    "The turn does not answer a policy-governed question. It is Pass for this mode even if another mode fails."
+  ],
+  "boundary_decisions": [
+    {"question": "Data missing, window given, cutoff not computable", "decision": "Pass", "traces": ["support-0184 t2"]},
+    {"question": "Refund blocked by a tool exception before a policy value is reached", "decision": "Fail unless the reply states the refund amount", "traces": ["support-0048 t1", "support-0050 t1", "support-0067 t1", "support-0214 t1", "support-0242 t1"]},
+    {"question": "Correct value given, other policy conditions omitted", "decision": "Pass", "traces": ["support-0107 t1"]},
+    {"question": "Eligibility stated with the delivery date or total but no window or days remaining", "decision": "Fail: a delivery date alone is not the deciding value", "traces": ["support-0244 t1", "support-0245 t1"]},
+    {"question": "Data missing, reply names the missing data but gives no window", "decision": "Reverted 2026-11-04: Pass rule 2 still requires the window. Proposed as Pass in dev review, then withdrawn when v0 was chosen as the final judge", "traces": ["support-0182 t1"]},
+    {"question": "Multi-turn: the value was given in an earlier turn's reply", "decision": "Judge the last turn's reply on its own; a value from an earlier turn does not count (decided 2026-11-04 in dev review)", "traces": ["support-0030 t2"]}
+  ],
+  "revisions": [
+    {"date": "2026-11-04", "after": "policy_answer_missing_specifics-v0 dev review", "changes": ["Pass rule 2 relaxed: the window is no longer required when data is missing", "Fail rule 4 scoped to blocked refunds", "Multi-turn boundary decision added"]},
+    {"date": "2026-11-04", "after": "v1 and v2 dev runs; v0 chosen as the final judge", "changes": ["Pass rule 2 relaxation reverted, so the definition matches the v0 prompt"]}
+  ],
+  "evidence": [
+    "The user request and earlier turns of the conversation.",
+    "Tool calls and results: check_return_eligibility, get_order / find_order (refund eligibility, dates), get_policy, search_help_center.",
+    "Policy values from facts.yaml: return window 30 days, dispute window 60 days, escalation SLA 24 hours, auto-approval threshold $100, and store return-window overrides."
+  ],
+  "not_this_mode": {
+    "policy id missing, value present": "code check (not judged)",
+    "order reported missing or list shown partially": "order_list_misreported",
+    "handling of a tool exception or redirect to support (beyond the missing refund amount)": "tool_failure_recovery_mishandled",
+    "agent picks an order the user never named": "acts_on_assumed_target",
+    "refusal resting on a record the seed marks inconsistent": "invalid_record_presented_as_valid",
+    "should have escalated": "missed_escalation"
+  }
+}

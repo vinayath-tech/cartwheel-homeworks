@@ -1,0 +1,28 @@
+{
+  "judge_id": "policy_answer_missing_specifics-v0",
+  "split": "dev",
+  "tpr": 0.9231,
+  "tnr": 0.9231,
+  "tpr_interval": [
+    0.6669,
+    0.9863
+  ],
+  "tnr_interval": [
+    0.6669,
+    0.9863
+  ],
+  "agreement": 0.9231,
+  "tp": 12,
+  "fn": 1,
+  "tn": 12,
+  "fp": 1,
+  "n": 26,
+  "disagreements": [
+    "8b5dc4995b8f30d1c7dec5b9dd8091dc",
+    "afc5cdf5e373755b8a41a4d1863f00f1"
+  ],
+  "prompt_path": "analysis/prompts/policy_answer_missing_specifics-v0.txt",
+  "model": "gpt-4o-mini",
+  "created_at": "2026-11-04T17:18:57.396621+00:00",
+  "note": "Same v0 predictions, no new judge run. Recomputed after the reviewer corrected labels on 0028, 0030 t2, 0057, 0136, 0216 (2026-11-04)."
+}

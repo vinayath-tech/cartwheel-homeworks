@@ -1,0 +1,74 @@
+{
+  "mode": "search_arguments_misexpress_request",
+  "kind": "development result: the rules were shaped using these labels",
+  "model_calls": 0,
+  "all_labelled_turns": {
+    "turns": 156,
+    "human_pass": 137,
+    "human_fail": 19,
+    "both_pass": 137,
+    "both_fail": 19,
+    "false_alarm": 0,
+    "missed_fail": 0,
+    "tpr": 1.0,
+    "tpr_interval": [
+      0.9727,
+      1.0
+    ],
+    "tnr": 1.0,
+    "tnr_interval": [
+      0.8318,
+      1.0
+    ]
+  },
+  "labelled_turns_with_search": {
+    "turns": 27,
+    "human_pass": 8,
+    "human_fail": 19,
+    "both_pass": 8,
+    "both_fail": 19,
+    "false_alarm": 0,
+    "missed_fail": 0,
+    "tpr": 1.0,
+    "tpr_interval": [
+      0.6756,
+      1.0
+    ],
+    "tnr": 1.0,
+    "tnr_interval": [
+      0.8318,
+      1.0
+    ]
+  },
+  "rules": {
+    "unstated_price_cap": {
+      "turns": 4,
+      "human_fail": 4
+    },
+    "store_name_in_query": {
+      "turns": 11,
+      "human_fail": 11
+    },
+    "category_as_query": {
+      "turns": 4,
+      "human_fail": 4
+    },
+    "store_id_as_name": {
+      "turns": 3,
+      "human_fail": 3
+    }
+  },
+  "disagreements": [],
+  "unlabelled_search_turns": [
+    "support-0111 t0",
+    "support-0112 t0",
+    "support-0118 t0",
+    "support-0121 t0",
+    "support-0123 t0",
+    "support-0193 t0",
+    "support-0194 t0",
+    "support-0194 t2",
+    "support-0195 t0",
+    "support-0199 t0"
+  ]
+}
