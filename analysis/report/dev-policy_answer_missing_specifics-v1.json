@@ -1,0 +1,33 @@
+{
+  "judge_id": "policy_answer_missing_specifics-v1",
+  "split": "dev",
+  "tpr": 0.6154,
+  "tnr": 0.7692,
+  "tpr_interval": [
+    0.3552,
+    0.8229
+  ],
+  "tnr_interval": [
+    0.4974,
+    0.9182
+  ],
+  "agreement": 0.6923,
+  "tp": 8,
+  "fn": 5,
+  "tn": 10,
+  "fp": 3,
+  "n": 26,
+  "disagreements": [
+    "01050f710245f4620411a37489b7c383",
+    "7b4a683d1ac4895d74a446e2fcddc4d4",
+    "8b5dc4995b8f30d1c7dec5b9dd8091dc",
+    "afc5cdf5e373755b8a41a4d1863f00f1",
+    "aff2402600587120a9a6cb65d0ca9868",
+    "eee53800d561ba2fb2e6e8a4636cf363",
+    "f29240e34ef6db951d35328cc8c4992b",
+    "f6c16ae566ff62b96cfe475f4cda92fb"
+  ],
+  "prompt_path": "analysis/prompts/policy_answer_missing_specifics-v1.txt",
+  "model": "gpt-4o-mini",
+  "created_at": "2026-11-04T22:57:17.125478+00:00"
+}

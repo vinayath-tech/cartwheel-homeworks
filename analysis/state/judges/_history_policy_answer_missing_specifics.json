@@ -1,0 +1,16 @@
+{
+  "versions": [
+    {
+      "judge_id": "policy_answer_missing_specifics-v0",
+      "prompt_hash": "0659c221263a"
+    },
+    {
+      "judge_id": "policy_answer_missing_specifics-v1",
+      "prompt_hash": "534db27deff9"
+    },
+    {
+      "judge_id": "policy_answer_missing_specifics-v2",
+      "prompt_hash": "ce58c6f4fddf"
+    }
+  ]
+}
