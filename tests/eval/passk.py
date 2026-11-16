@@ -58,8 +58,12 @@ def pass_at_k(n: int, c: int, k: int) -> float:
         pass_at_k(8, 6, 4) == 1.0  (only 2 failures, so every 4-subset hits
                                     a success)
     """
-    ### YOUR CODE HERE (hw6)
-    raise NotImplementedError("hw6: implement pass_at_k")
+    _check_counts(n, c, k)
+    failures = n - c
+    # comb(failures, k) counts the k-subsets made only of failed runs.
+    # It is 0 when there are fewer than k failures, which gives 1.0.
+    only_failures = comb(failures, k) / comb(n, k)
+    return 1.0 - only_failures
 
 
 def pass_hat_k(n: int, c: int, k: int) -> float:
@@ -90,8 +94,10 @@ def pass_hat_k(n: int, c: int, k: int) -> float:
         pass_hat_k(8, 6, 4) == C(6,4)/C(8,4) == 15/70 == 0.2142857...
         pass_hat_k(8, 6, 8) == 0.0  (not all 8 succeeded)
     """
-    ### YOUR CODE HERE (hw6)
-    raise NotImplementedError("hw6: implement pass_hat_k")
+    _check_counts(n, c, k)
+    # comb(c, k) counts the k-subsets made only of passed runs.
+    # It is 0 when there are fewer than k passes, which gives 0.0.
+    return comb(c, k) / comb(n, k)
 
 
 def case_passes(
@@ -140,5 +146,41 @@ def case_passes(
         case_passes("capability", 2, 5, 0.6)     -> pass  (never blocks)
         case_passes("capability", 1, 5, 0.6)     -> pass  (never blocks)
     """
-    ### YOUR CODE HERE (hw6)
-    raise NotImplementedError("hw6: implement case_passes")
+    if n < 1:
+        raise ValueError(f"n must be at least 1, got {n}")
+    if passes < 0 or passes > n:
+        raise ValueError(f"passes must be between 0 and {n}, got {passes}")
+
+    if kind == "regression":
+        failed = n - passes
+        if failed > 0:
+            return {
+                "decision": "block",
+                "reason": f"regression case failed {failed} of {n} runs",
+            }
+        return {
+            "decision": "pass",
+            "reason": f"regression case passed all {n} runs",
+        }
+
+    if kind == "capability":
+        if baseline_pass_rate is None:
+            baseline_text = "no baseline"
+        else:
+            baseline_text = f"baseline {baseline_pass_rate:.1f}"
+        return {
+            "decision": "pass",
+            "reason": f"capability case passed {passes} of {n}, {baseline_text}, not blocking",
+        }
+
+    raise ValueError(f"kind must be 'regression' or 'capability', got {kind!r}")
+
+
+def _check_counts(n: int, c: int, k: int) -> None:
+    """Raise ValueError when n, c, or k cannot describe real runs."""
+    if n < 1:
+        raise ValueError(f"n must be at least 1, got {n}")
+    if c < 0 or c > n:
+        raise ValueError(f"c must be between 0 and {n}, got {c}")
+    if k < 1 or k > n:
+        raise ValueError(f"k must be between 1 and {n}, got {k}")

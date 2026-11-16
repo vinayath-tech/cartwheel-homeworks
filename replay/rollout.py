@@ -137,6 +137,10 @@ def _extract_turn(new_items: list[Any]) -> dict[str, Any]:
     calls: dict[str, dict[str, Any]] = {}
     ordered: list[dict[str, Any]] = []
     reply_parts: list[str] = []
+    # HW6: the same items in the order they happened, in the HW5 message
+    # shape (role + text, or role + name + arguments/content). The judge
+    # needs this order to tell the final reply from earlier assistant notes.
+    messages: list[dict[str, Any]] = []
     for item in new_items:
         if isinstance(item, ToolCallItem):
             raw = item.raw_item
@@ -147,6 +151,9 @@ def _extract_turn(new_items: list[Any]) -> dict[str, Any]:
             }
             calls[getattr(raw, "call_id", None)] = record
             ordered.append(record)
+            messages.append(
+                {"role": "tool_call", "name": record["name"], "arguments": record["args"]}
+            )
         elif isinstance(item, ToolCallOutputItem):
             call_id = None
             raw = item.raw_item
@@ -156,14 +163,26 @@ def _extract_turn(new_items: list[Any]) -> dict[str, Any]:
                 call_id = getattr(raw, "call_id", None)
             if call_id in calls:
                 calls[call_id]["result"] = item.output
+                messages.append(
+                    {
+                        "role": "tool_result",
+                        "name": calls[call_id]["name"],
+                        "content": item.output,
+                    }
+                )
         elif isinstance(item, MessageOutputItem):
+            message_parts = []
             for part in getattr(item.raw_item, "content", []) or []:
                 text = getattr(part, "text", None)
                 if text:
                     reply_parts.append(text)
+                    message_parts.append(text)
+            if message_parts:
+                messages.append({"role": "assistant", "text": "\n".join(message_parts)})
     return {
         "reply": "\n".join(reply_parts),
         "tool_calls": ordered,
+        "messages": messages,
         "steps": len(new_items),
     }
 
@@ -249,12 +268,144 @@ def _all_tool_calls(transcript: dict[str, Any], turn: int | None) -> list[dict[s
     return [call for t in turns for call in t["tool_calls"]]
 
 
+# ---------------------------------------------------------------------------
+# HW6: search_products arguments (copy of the HW5 code evaluator)
+#
+# The four rules below copy analysis/code_evals/{catalog,search_rules}.py.
+# The Harbor container does not include analysis/, so the rules live here.
+# tests/test_hw6_search_check.py runs both copies on every HW4 trace and
+# fails if they ever disagree.
+# ---------------------------------------------------------------------------
+
+
+def _search_normalise(text: str) -> str:
+    """Same as analysis/code_evals/catalog.py::normalise."""
+    text = text.lower()
+    for character in "_/-&,.!?'\"":
+        text = text.replace(character, " ")
+    kept_words = []
+    for word in text.split():
+        if word != "and":
+            kept_words.append(word)
+    return " ".join(kept_words)
+
+
+def _search_catalog(conn: sqlite3.Connection) -> tuple[list[str], list[str]]:
+    """Store names and categories from the run's database, normalised."""
+    store_names = []
+    for row in conn.execute("SELECT name FROM stores"):
+        store_names.append(_search_normalise(row[0]))
+    categories = []
+    for row in conn.execute(
+        "SELECT category FROM products UNION SELECT category FROM stores"
+    ):
+        categories.append(_search_normalise(row[0]))
+    return store_names, categories
+
+
+def _store_name_in(text: str, store_names: list[str]) -> str | None:
+    text_with_spaces = " " + _search_normalise(text) + " "
+    for store_name in store_names:
+        if " " + store_name + " " in text_with_spaces:
+            return store_name
+    return None
+
+
+def _is_category(text: str, categories: list[str]) -> bool:
+    word = _search_normalise(text)
+    if word in categories:
+        return True
+    if word + "s" in categories:
+        return True
+    if word.endswith("s") and word[:-1] in categories:
+        return True
+    if word.endswith("ies") and word[:-3] + "y" in categories:
+        return True
+    return False
+
+
+def _numbers_user_wrote(user_text: str) -> list[float]:
+    numbers = []
+    for number_string in re.findall(r"\d+\.?\d*", user_text.replace(",", "")):
+        numbers.append(float(number_string))
+    return numbers
+
+
+def search_call_problems(
+    args: dict[str, Any],
+    user_text: str,
+    store_names: list[str],
+    categories: list[str],
+) -> list[str]:
+    """Run the four HW5 rules on one search_products call.
+
+    Returns one sentence per rule that fired; an empty list means the call
+    is fine.
+    """
+    query = args.get("query")
+    store = args.get("store")
+    max_price_usd = args.get("max_price_usd")
+    store_is_empty = store is None or store == ""
+    problems = []
+
+    # Rule A: the store name belongs in store, not in query.
+    if store_is_empty:
+        found = _store_name_in(query or "", store_names)
+        if found is not None:
+            problems.append(
+                f"store_name_in_query: query '{query}' holds store name '{found}'"
+            )
+    # Rule B: store must be a name, not a numeric id.
+    if not store_is_empty and str(store).isdigit():
+        problems.append(f"store_id_as_name: store is the id '{store}'")
+    # Rule C: with no store, query must not be only a catalog category.
+    if store_is_empty and _is_category(query or "", categories):
+        problems.append(f"category_as_query: query '{query}' is a category")
+    # Rule D: a price cap must be a number the user wrote.
+    if max_price_usd is not None:
+        if float(max_price_usd) not in _numbers_user_wrote(user_text):
+            problems.append(
+                f"unstated_price_cap: max_price_usd {max_price_usd} never stated"
+            )
+    return problems
+
+
+def _search_arguments_check(
+    transcript: dict[str, Any], conn: sqlite3.Connection
+) -> tuple[bool, str]:
+    """Every search_products call must follow the four rules.
+
+    Like HW5, a call is compared with what the user wrote up to and including
+    its own turn. A run with no search_products call passes this check; add
+    a tool_called check when the case needs a search to happen.
+    """
+    store_names, categories = _search_catalog(conn)
+    user_messages: list[str] = []
+    problems: list[str] = []
+    for turn in transcript["turns"]:
+        user_messages.append(turn.get("user") or "")
+        user_text = "\n".join(user_messages)
+        for call in turn["tool_calls"]:
+            if call["name"] == "search_products":
+                problems.extend(
+                    search_call_problems(
+                        call["args"] or {}, user_text, store_names, categories
+                    )
+                )
+    if problems:
+        return (False, "search arguments misexpress the request: " + "; ".join(problems))
+    return (True, "search arguments follow the request")
+
+
 def _one_check(
     check: dict[str, Any], transcript: dict[str, Any], conn: sqlite3.Connection
 ) -> tuple[bool, str]:
     """Run one machine-readable check. Returns (ok, description)."""
     kind = check["check"]
     reply = transcript["final_reply"]
+
+    if kind == "search_arguments_follow_request":
+        return _search_arguments_check(transcript, conn)
 
     if kind == "no_write_tools":
         calls = _all_tool_calls(transcript, check.get("turn"))
@@ -266,6 +417,36 @@ def _one_check(
         calls = _all_tool_calls(transcript, check.get("turn"))
         ok = any(c["name"] == check["name"] for c in calls)
         return (ok, f"tool {check['name']} called")
+
+    # HW6: passes when the agent searched, or asked the user a question instead.
+    # Asking "what is your budget?" is a fair answer to a vague request.
+    if kind == "searched_or_asked":
+        calls = _all_tool_calls(transcript, check.get("turn"))
+        searched = False
+        for call in calls:
+            if call["name"] == "search_products":
+                searched = True
+        asked = "?" in reply
+        return (searched or asked, "searched for products or asked the user a question")
+
+    # HW6: passes when the agent looked up the exact order the user means.
+    # A lookup counts when a tool got that order_id as an argument, or when
+    # find_order returned it. list_my_orders does not count: it returns every
+    # order the user has, so it does not show the agent found the right one.
+    if kind == "order_looked_up":
+        wanted = check["order_id"]
+        found = False
+        for call in _all_tool_calls(transcript, None):
+            args = call.get("args") or {}
+            # Compare as text, because a model may send 1695 or "1695".
+            if str(args.get("order_id")) == str(wanted):
+                found = True
+            result = call.get("result")
+            if call["name"] == "find_order" and isinstance(result, dict):
+                for order in result.get("orders") or []:
+                    if str(order.get("order_id")) == str(wanted):
+                        found = True
+        return (found, f"order #{wanted} was looked up")
 
     if kind == "tool_result_permission_denied":
         for call in _all_tool_calls(transcript, None):
@@ -385,10 +566,49 @@ def retrieved_docs_text(transcript: dict[str, Any]) -> str:
     return "\n\n".join(chunks) if chunks else "(no policy documents were retrieved)"
 
 
+def _hw5_text(value: Any) -> str:
+    """Mirror analysis.helpers.normalization._text for the values we produce."""
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, default=str)
+
+
+def _hw5_judge_lines(turn: dict[str, Any]) -> list[str]:
+    """One turn in the exact text the HW5 judge saw.
+
+    HW5 (analysis/run_judges.py::_judge_message) folded the tool name into the
+    tool data, and analysis/helpers/normalization.py::_flatten wrote one
+    "role: content" line per message, skipping empty messages. Earlier
+    assistant notes stay on their own lines, so the judge can tell them apart
+    from the final reply.
+    """
+    lines = [f"user: {turn.get('user', '')}"] if turn.get("user") else []
+    for message in turn["messages"]:
+        role = message["role"]
+        if role == "tool_call":
+            content = _hw5_text(
+                {"tool": message.get("name"), "arguments": message.get("arguments")}
+            )
+        elif role == "tool_result":
+            content = _hw5_text(
+                {"tool": message.get("name"), "result": message.get("content")}
+            )
+        else:
+            content = _hw5_text(message.get("text"))
+        if content:
+            lines.append(f"{role}: {content}")
+    return lines
+
+
 def judge_trace_text(transcript: dict[str, Any]) -> str:
     """Format a runtime transcript like the normalized traces used in HW5."""
     lines: list[str] = []
     for turn in transcript.get("turns", []):
+        if "messages" in turn:
+            lines.extend(_hw5_judge_lines(turn))
+            continue
         lines.append(f"user: {turn.get('user', '')}")
         for call in turn.get("tool_calls", []):
             arguments = json.dumps(
