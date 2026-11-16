@@ -342,6 +342,12 @@ def _dockerfile() -> str:
 ENV UV_LINK_MODE=copy
 ENV OPENAI_AGENTS_DISABLE_TRACING=1
 
+# Install the verifier's packages once, when the image is built. tests/test.sh
+# runs the same uvx command, so each trial reuses this cache instead of
+# downloading about 120 packages again (about 2 minutes per trial).
+# This layer is the same for every task, so Docker builds it only once.
+RUN uvx --from 'harbor-rewardkit==0.2.1' --with 'docetl==0.3.0' rewardkit --help > /dev/null
+
 WORKDIR /app
 COPY cartwheel/pyproject.toml cartwheel/uv.lock cartwheel/README.md /app/
 RUN uv sync --frozen --no-dev --no-install-project

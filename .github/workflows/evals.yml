@@ -22,8 +22,8 @@ jobs:
     name: Harbor evaluations
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    # 14 cases x 5 attempts takes about an hour; leave room for slow runs.
-    timeout-minutes: 150
+    # The first CI run took 33 minutes before the speed-ups; 60 leaves room.
+    timeout-minutes: 60
     env:
       CARTWHEEL_MODEL: ${{ vars.CARTWHEEL_MODEL }}
       PYTHONPATH: ${{ github.workspace }}
@@ -50,6 +50,8 @@ jobs:
         run: uv run python scripts/export_harbor_tasks.py
 
       # 3 and 4. Run five attempts per task, each in a fresh Docker container.
+      #    --n-concurrent 8 runs eight trials at a time (Harbor's default is
+      #    4). Trials mostly wait on the model API, so this fits the runner.
       #    The agent and judge provider keys come from the job's env block
       #    above, which reads them from repository secrets. Harbor passes them
       #    on to the agent and to the verifier.
@@ -61,6 +63,7 @@ jobs:
             -m "$CARTWHEEL_MODEL" \
             -e docker \
             --n-attempts 5 \
+            --n-concurrent 8 \
             --job-name hw6-evals \
             --jobs-dir .harbor/jobs \
             --yes
