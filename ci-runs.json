@@ -1,0 +1,23 @@
+{
+  "pull_request": "https://github.com/vinayath-tech/cartwheel-homeworks/pull/5",
+  "case_id": "e-014",
+  "regression_run": {
+    "url": "https://github.com/vinayath-tech/cartwheel-homeworks/actions/runs/43913033032",
+    "commit": "3db2114",
+    "change": "Added a temporary prompt instruction: when the shopper has not stated a budget, always set max_price_usd to 50.",
+    "case_result": "e-014 passed 0 of 5 runs; CI decision block",
+    "job_conclusion": "failure"
+  },
+  "revert_run": {
+    "url": "https://github.com/vinayath-tech/cartwheel-homeworks/actions/runs/43981652464",
+    "commit": "60d2c5a",
+    "change": "Removed the temporary prompt instruction. agent/agent.py matches commit 3920410 again.",
+    "case_result": "e-014 passed 5 of 5 runs; CI decision pass",
+    "job_conclusion": "failure",
+    "infrastructure_problems": [
+      "e-010: 1 trial did not produce a reward",
+      "e-012: 1 trial did not produce a reward"
+    ]
+  },
+  "explanation": "The temporary instruction told the agent to add max_price_usd 50 to searches where the user stated no budget. e-014 failed all five runs with completed verdicts (no infrastructure errors), so the regression gate blocked the change. The instruction targets the search_arguments_follow_request check (rule unstated_price_cap: the user of e-014 never states a number). After the revert, e-014 passed all five runs again, so the original behavior returned. The second job still failed because two capability-case trials (e-010, e-012) produced no reward, which the summary treats as an infrastructure problem; no regression case failed in that run."
+}
