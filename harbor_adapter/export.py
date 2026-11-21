@@ -164,7 +164,9 @@ def _task_toml(case: dict[str, Any], judges: list[dict[str, Any]]) -> str:
         f"mode = {_toml_string(case['mode'])}",
         "",
         "[verifier]",
-        "timeout_sec = 300.0",
+        # The verifier installs its packages before grading. That usually takes
+        # about 2 minutes, but a slow download once took 339 s in HW6 baselines.
+        "timeout_sec = 600.0",
     ]
     keys = sorted({key for judge in judges if (key := _provider_key(judge["model"]))})
     if keys:
@@ -249,15 +251,16 @@ EXPECTED = __EXPECTED__
 
 
 def _decode(row: dict) -> str:
+    # Same rule as HW5 (analysis/helpers/scale.py::_decode_judge_rows): the
+    # result must be exactly Pass or Fail. Anything else raises, so Harbor
+    # records an infrastructure error instead of counting a failed run.
+    verdict = row.get("result")
     critique = row.get("critique")
+    if verdict not in ("Pass", "Fail"):
+        raise ValueError(f"judge result must be Pass or Fail, got {verdict!r}")
     if not isinstance(critique, str) or not critique.strip():
         raise ValueError("judge result needs a critique")
-    raw = str(row.get("result", "")).strip().lower().rstrip(".")
-    if raw in {"pass", "passed"}:
-        return "pass"
-    if raw in {"fail", "failed"}:
-        return "fail"
-    return "fail"
+    return "pass" if verdict == "Pass" else "fail"
 
 
 @criterion
@@ -338,6 +341,12 @@ def _dockerfile() -> str:
 
 ENV UV_LINK_MODE=copy
 ENV OPENAI_AGENTS_DISABLE_TRACING=1
+
+# Install the verifier's packages once, when the image is built. tests/test.sh
+# runs the same uvx command, so each trial reuses this cache instead of
+# downloading about 120 packages again (about 2 minutes per trial).
+# This layer is the same for every task, so Docker builds it only once.
+RUN uvx --from 'harbor-rewardkit==0.2.1' --with 'docetl==0.3.0' rewardkit --help > /dev/null
 
 WORKDIR /app
 COPY cartwheel/pyproject.toml cartwheel/uv.lock cartwheel/README.md /app/
